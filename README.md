@@ -292,5 +292,5 @@ For questions, suggestions, or feedback, please open an issue on GitHub.
 
 ---
 
-**Author**: Matrix Agent  
+**Author**: MindForge Team  
 **Repository**: [https://github.com/yasmramos/MindForge](https://github.com/yasmramos/MindForge)
