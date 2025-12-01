@@ -122,6 +122,23 @@ public class KNearestNeighbors implements Classifier<double[]> {
     }
     
     /**
+     * Predicts class labels for multiple samples.
+     * 
+     * @param X array of feature vectors
+     * @return array of predicted labels
+     */
+    public int[] predict(double[][] X) {
+        if (X == null || X.length == 0) {
+            throw new IllegalArgumentException("Input data cannot be null or empty");
+        }
+        int[] predictions = new int[X.length];
+        for (int i = 0; i < X.length; i++) {
+            predictions[i] = predict(X[i]);
+        }
+        return predictions;
+    }
+    
+    /**
      * Returns the value of k.
      * 
      * @return number of neighbors
