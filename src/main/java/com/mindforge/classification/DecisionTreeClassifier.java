@@ -96,12 +96,16 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
     private final int minSamplesSplit;
     private final int minSamplesLeaf;
     private final Criterion criterion;
+    private final Integer maxFeatures;  // null means use all features
+    private final int randomState;
     
     // Model state
     private Node root;
     private int numClasses;
     private int numFeatures;
     private boolean fitted;
+    private Random random;
+    private double[] featureImportance;
     
     /**
      * Private constructor - use Builder to create instances.
@@ -111,7 +115,10 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
         this.minSamplesSplit = builder.minSamplesSplit;
         this.minSamplesLeaf = builder.minSamplesLeaf;
         this.criterion = builder.criterion;
+        this.maxFeatures = builder.maxFeatures;
+        this.randomState = builder.randomState;
         this.fitted = false;
+        this.random = new Random(randomState);
     }
     
     /**
@@ -122,6 +129,8 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
         private int minSamplesSplit = 2;
         private int minSamplesLeaf = 1;
         private Criterion criterion = Criterion.GINI;
+        private Integer maxFeatures = null;  // null means use all features
+        private int randomState = 42;
         
         public Builder maxDepth(int maxDepth) {
             if (maxDepth < 1) {
@@ -152,6 +161,19 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
             return this;
         }
         
+        public Builder maxFeatures(Integer maxFeatures) {
+            if (maxFeatures != null && maxFeatures <= 0) {
+                throw new IllegalArgumentException("maxFeatures must be positive");
+            }
+            this.maxFeatures = maxFeatures;
+            return this;
+        }
+        
+        public Builder randomState(int randomState) {
+            this.randomState = randomState;
+            return this;
+        }
+        
         public DecisionTreeClassifier build() {
             return new DecisionTreeClassifier(this);
         }
@@ -166,6 +188,16 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
     
     @Override
     public void train(double[][] X, int[] y) {
+        fit(X, y);
+    }
+    
+    /**
+     * Fit the decision tree classifier.
+     * 
+     * @param X Training feature matrix (n_samples × n_features)
+     * @param y Training labels (n_samples)
+     */
+    public void fit(double[][] X, int[] y) {
         if (X == null || y == null) {
             throw new IllegalArgumentException("Training data cannot be null");
         }
@@ -175,11 +207,20 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
         
         this.numFeatures = X[0].length;
         this.numClasses = Arrays.stream(y).max().orElse(0) + 1;
+        this.featureImportance = new double[numFeatures];
         
         // Build the tree recursively (start at depth 1 for root)
         int[] indices = IntStream.range(0, X.length).toArray();
         this.root = buildTree(X, y, indices, 1);
         this.fitted = true;
+        
+        // Normalize feature importance
+        double totalImportance = Arrays.stream(featureImportance).sum();
+        if (totalImportance > 0) {
+            for (int i = 0; i < featureImportance.length; i++) {
+                featureImportance[i] /= totalImportance;
+            }
+        }
     }
     
     /**
@@ -271,8 +312,22 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
         }
         double parentImpurity = calculateImpurity(parentProbs);
         
-        // Try all features
-        for (int featureIdx = 0; featureIdx < numFeatures; featureIdx++) {
+        
+        // Select features to consider
+        int[] featuresToTry;
+        if (maxFeatures != null && maxFeatures < numFeatures) {
+            // Random feature selection
+            featuresToTry = random.ints(0, numFeatures)
+                                  .distinct()
+                                  .limit(maxFeatures)
+                                  .toArray();
+        } else {
+            // Use all features
+            featuresToTry = IntStream.range(0, numFeatures).toArray();
+        }
+        
+        // Try selected features
+        for (int featureIdx : featuresToTry) {
             // Get unique values for this feature
             Set<Double> uniqueValues = new TreeSet<>();
             for (int idx : indices) {
@@ -311,6 +366,13 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
                     bestSplit = new Split(featureIdx, threshold, leftIndices, rightIndices, gain);
                 }
             }
+        }
+        
+        
+        // Update feature importance
+        if (bestSplit != null) {
+            double importance = bestSplit.gain * indices.length;
+            featureImportance[bestSplit.featureIndex] += importance;
         }
         
         return bestSplit;
@@ -425,6 +487,20 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
     }
     
     /**
+     * Predicts class labels for multiple inputs.
+     * 
+     * @param X array of input features
+     * @return array of predicted class labels
+     */
+    public int[] predict(double[][] X) {
+        int[] predictions = new int[X.length];
+        for (int i = 0; i < X.length; i++) {
+            predictions[i] = predict(X[i]);
+        }
+        return predictions;
+    }
+    
+    /**
      * Predicts class probabilities for a single input.
      * 
      * @param x input features
@@ -517,6 +593,18 @@ public class DecisionTreeClassifier implements Classifier<double[]> {
         return fitted;
     }
     
+    
+    /**
+     * Get feature importance scores.
+     * 
+     * @return Array of feature importance values (normalized to sum to 1)
+     */
+    public double[] getFeatureImportance() {
+        if (!fitted) {
+            return null;
+        }
+        return featureImportance.clone();
+    }
     /**
      * Returns information about the tree structure as a string.
      */

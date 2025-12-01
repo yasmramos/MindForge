@@ -8,7 +8,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 
 ## 🚀 Features
 
-- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, and more coming soon
+- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, and more coming soon
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
 - **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
@@ -119,6 +119,48 @@ int[] predictions = tree.predict(X_train);
 double accuracy = Metrics.accuracy(y_train, predictions);
 System.out.println("Accuracy: " + accuracy);
 System.out.println("Tree depth: " + tree.getTreeDepth());
+```
+
+### Random Forest Classification
+
+```java
+import com.mindforge.classification.RandomForestClassifier;
+import com.mindforge.classification.DecisionTreeClassifier;
+import com.mindforge.validation.Metrics;
+
+// Training data
+double[][] X_train = {{1.0, 2.0}, {2.0, 3.0}, {8.0, 8.0}, {9.0, 10.0}};
+int[] y_train = {0, 0, 1, 1};
+
+// Create and train Random Forest with custom parameters
+RandomForestClassifier rf = new RandomForestClassifier.Builder()
+    .nEstimators(100)              // Number of trees
+    .maxFeatures("sqrt")           // Features to consider at each split
+    .maxDepth(10)                  // Maximum tree depth
+    .minSamplesSplit(2)            // Minimum samples to split
+    .criterion(DecisionTreeClassifier.Criterion.GINI)
+    .bootstrap(true)               // Use bootstrap sampling
+    .randomState(42)               // For reproducibility
+    .build();
+
+rf.fit(X_train, y_train);
+
+// Make predictions
+double[] testPoint = {5.0, 5.0};
+int[] predictions = rf.predict(new double[][]{testPoint});
+System.out.println("Prediction: " + predictions[0]);
+
+// Get probability predictions
+double[][] probabilities = rf.predictProba(new double[][]{testPoint});
+System.out.println("Class probabilities: " + Arrays.toString(probabilities[0]));
+
+// Evaluate the model
+double oobScore = rf.getOOBScore();
+System.out.println("Out-of-bag score: " + oobScore);
+
+// Get feature importance
+double[] importance = rf.getFeatureImportance();
+System.out.println("Feature importance: " + Arrays.toString(importance));
 ```
 
 ### Linear Regression
@@ -263,6 +305,28 @@ int getNumLeaves()                                    // Get number of leaf node
 boolean isFitted()                                    // Check if model is trained
 ```
 
+#### RandomForestClassifier
+```java
+RandomForestClassifier.Builder()                      // Builder for custom configuration
+  .nEstimators(int n)                                 // Set number of trees (default: 100)
+  .maxFeatures(String mode)                           // Set max features: "sqrt" or "log2"
+  .maxFeatures(int n)                                 // Set specific number of features
+  .maxDepth(int depth)                                // Set maximum tree depth
+  .minSamplesSplit(int samples)                       // Set minimum samples to split
+  .minSamplesLeaf(int samples)                        // Set minimum samples per leaf
+  .criterion(Criterion criterion)                     // Set splitting criterion (GINI or ENTROPY)
+  .bootstrap(boolean use)                             // Enable/disable bootstrap sampling (default: true)
+  .randomState(int seed)                              // Set random seed for reproducibility
+  .build()                                            // Build the classifier
+void fit(double[][] X, int[] y)                       // Train the model
+int[] predict(double[][] X)                           // Predict multiple instances
+double[][] predictProba(double[][] X)                 // Get class probabilities for multiple instances
+double getOOBScore()                                  // Get out-of-bag score
+double[] getFeatureImportance()                       // Get feature importance scores
+int getNEstimators()                                  // Get number of trees
+int[] getClasses()                                    // Get unique class labels
+```
+
 ### Regression
 
 #### LinearRegression
@@ -373,7 +437,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - [x] Train/Test split functionality (with stratified split support)
 
 ### Medium Term
-- [ ] Random Forest
+- [x] Random Forest
 - [ ] Support Vector Machines (SVM)
 - [ ] Gradient Boosting
 - [ ] Cross-validation
@@ -390,7 +454,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.2-alpha
+- **Version**: 1.0.3-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
