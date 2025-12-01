@@ -12,6 +12,9 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
 - **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
+- **Feature Selection**: VarianceThreshold, SelectKBest (F-test, Chi2, Mutual Info), RFE (Recursive Feature Elimination)
+- **Dimensionality Reduction**: PCA (Principal Component Analysis)
+- **Model Persistence**: Save/Load models to disk or byte arrays
 - **Model Evaluation**: Cross-Validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split), Train-Test Split
 - **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, MSE, RMSE, MAE, R²
 - **Distance Functions**: Euclidean, Manhattan, Chebyshev, Minkowski
@@ -37,6 +40,14 @@ MindForge/
 │   │   ├── SimpleImputer.java
 │   │   ├── LabelEncoder.java
 │   │   └── DataSplit.java
+│   ├── feature/           # Feature selection
+│   │   ├── VarianceThreshold.java
+│   │   ├── SelectKBest.java
+│   │   └── RFE.java
+│   ├── decomposition/     # Dimensionality reduction
+│   │   └── PCA.java
+│   ├── persistence/       # Model save/load
+│   │   └── ModelPersistence.java
 │   ├── math/              # Mathematical functions
 │   │   └── Distance.java
 │   ├── validation/        # Evaluation metrics
@@ -469,6 +480,128 @@ DataSplit.Split split = DataSplit.trainTestSplit(X, y, 0.25, 42);
 // Access: split.XTrain, split.XTest, split.yTrain, split.yTest
 ```
 
+### Feature Selection
+
+```java
+import com.mindforge.feature.VarianceThreshold;
+import com.mindforge.feature.SelectKBest;
+import com.mindforge.feature.RFE;
+
+// === VarianceThreshold - Remove low-variance features ===
+double[][] X = {
+    {0.0, 2.0, 0.0, 3.0},
+    {0.0, 1.0, 4.0, 3.0},
+    {0.0, 1.0, 1.0, 3.0}
+};
+
+VarianceThreshold vt = new VarianceThreshold(0.0); // Remove constant features
+double[][] X_vt = vt.fitTransform(X);
+System.out.println("Features remaining: " + X_vt[0].length);
+System.out.println("Selected indices: " + Arrays.toString(vt.getSelectedFeatureIndices()));
+
+// === SelectKBest - Select top k features by statistical tests ===
+double[][] X_train = {
+    {1.0, 2.0, 0.1}, {1.2, 2.1, 0.2},
+    {5.0, 2.0, 0.15}, {5.2, 2.1, 0.18}
+};
+int[] y_train = {0, 0, 1, 1};
+
+// Using F-classif (ANOVA F-value)
+SelectKBest selector = new SelectKBest(SelectKBest.ScoreFunction.F_CLASSIF, 2);
+double[][] X_best = selector.fitTransform(X_train, y_train);
+System.out.println("Feature scores: " + Arrays.toString(selector.getScores()));
+
+// Using Chi-squared (for non-negative features)
+SelectKBest chi2Selector = new SelectKBest(SelectKBest.ScoreFunction.CHI2, 2);
+chi2Selector.fit(X_train, y_train);
+
+// Using Mutual Information
+SelectKBest miSelector = new SelectKBest(SelectKBest.ScoreFunction.MUTUAL_INFO, 2);
+miSelector.fit(X_train, y_train);
+
+// === RFE - Recursive Feature Elimination ===
+RFE rfe = new RFE(2);           // Select 2 features
+// RFE rfe = new RFE(2, 1);     // Select 2, remove 1 at a time
+rfe.fit(X_train, y_train);
+
+double[][] X_rfe = rfe.transform(X_train);
+System.out.println("Feature rankings: " + Arrays.toString(rfe.getRanking()));
+System.out.println("Feature importances: " + Arrays.toString(rfe.getFeatureImportances()));
+```
+
+### PCA (Principal Component Analysis)
+
+```java
+import com.mindforge.decomposition.PCA;
+
+// Create sample data
+double[][] X = {
+    {1.0, 2.0, 3.0, 4.0},
+    {2.0, 3.0, 4.0, 5.0},
+    {3.0, 4.0, 5.0, 6.0},
+    {4.0, 5.0, 6.0, 7.0}
+};
+
+// Reduce to 2 components
+PCA pca = new PCA(2);
+double[][] X_reduced = pca.fitTransform(X);
+System.out.println("Original dimensions: " + X[0].length);
+System.out.println("Reduced dimensions: " + X_reduced[0].length);
+
+// Get explained variance
+double[] varianceRatio = pca.getExplainedVarianceRatio();
+System.out.println("Explained variance ratio: " + Arrays.toString(varianceRatio));
+
+double[] cumulative = pca.getCumulativeExplainedVarianceRatio();
+System.out.println("Cumulative variance: " + Arrays.toString(cumulative));
+
+// Reconstruct original data (with some loss)
+double[][] X_reconstructed = pca.inverseTransform(X_reduced);
+
+// Get principal components
+double[][] components = pca.getComponents();
+System.out.println("Number of components: " + pca.getNumberOfComponents());
+```
+
+### Model Persistence
+
+```java
+import com.mindforge.persistence.ModelPersistence;
+import com.mindforge.classification.GaussianNaiveBayes;
+
+// Train a model
+double[][] X_train = {{-2.0, -2.0}, {-1.8, -2.2}, {2.0, 2.0}, {1.8, 2.2}};
+int[] y_train = {0, 0, 1, 1};
+
+GaussianNaiveBayes model = new GaussianNaiveBayes();
+model.train(X_train, y_train);
+
+// Save model to file
+ModelPersistence.save(model, "my_model.bin");
+
+// Load model from file
+GaussianNaiveBayes loadedModel = ModelPersistence.load("my_model.bin");
+
+// Or with type checking
+GaussianNaiveBayes typedModel = ModelPersistence.load("my_model.bin", GaussianNaiveBayes.class);
+
+// Make predictions with loaded model
+int[] predictions = loadedModel.predict(X_train);
+System.out.println("Predictions: " + Arrays.toString(predictions));
+
+// Get model metadata without fully loading
+ModelPersistence.ModelMetadata metadata = ModelPersistence.getMetadata("my_model.bin");
+System.out.println("Model class: " + metadata.getSimpleClassName());
+System.out.println("File size: " + metadata.getFileSize() + " bytes");
+
+// Check if file is valid
+boolean isValid = ModelPersistence.isValidModelFile("my_model.bin");
+
+// Serialize to byte array (for network transfer or database storage)
+byte[] bytes = ModelPersistence.toBytes(model);
+GaussianNaiveBayes fromBytes = ModelPersistence.fromBytes(bytes);
+```
+
 ## 🧪 Running Tests
 
 ```bash
@@ -477,7 +610,7 @@ mvn test
 
 All tests should pass:
 ```
-Tests run: 285, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 437, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
@@ -663,20 +796,22 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - [x] Naive Bayes (Gaussian, Multinomial, Bernoulli)
 - [x] Support Vector Machines (Linear SVM)
 - [x] Gradient Boosting
-- [ ] Feature selection
+- [x] Feature Selection (VarianceThreshold, SelectKBest, RFE)
+- [x] PCA (Principal Component Analysis)
+- [x] Model Persistence (Save/Load)
 
 ### Long Term
 - [ ] Neural Networks (MLP)
 - [ ] Deep Learning support
-- [ ] PCA (Principal Component Analysis)
-- [ ] Advanced ensemble methods
+- [ ] Advanced ensemble methods (AdaBoost, XGBoost)
+- [ ] SVM Kernels (RBF, Polynomial)
 - [ ] GPU acceleration
 
 ## 📄 Project Information
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.7-alpha
+- **Version**: 1.0.8-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
