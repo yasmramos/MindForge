@@ -11,6 +11,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 - **Classification Algorithms**: K-Nearest Neighbors (KNN), and more coming soon
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
+- **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
 - **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, MSE, RMSE, MAE, R²
 - **Distance Functions**: Euclidean, Manhattan, Chebyshev, Minkowski
 - **Simple and Consistent Interface**: Intuitive APIs for all algorithms
@@ -29,12 +30,17 @@ MindForge/
 │   ├── clustering/         # Clustering algorithms
 │   │   ├── Clusterer.java
 │   │   └── KMeans.java
+│   ├── preprocessing/     # Data preprocessing
+│   │   ├── MinMaxScaler.java
+│   │   ├── StandardScaler.java
+│   │   ├── SimpleImputer.java
+│   │   ├── LabelEncoder.java
+│   │   └── DataSplit.java
 │   ├── math/              # Mathematical functions
 │   │   └── Distance.java
 │   ├── validation/        # Evaluation metrics
 │   │   └── Metrics.java
 │   ├── neural/            # Neural networks (coming soon)
-│   ├── data/              # Data processing (coming soon)
 │   └── util/              # Utilities (coming soon)
 └── pom.xml
 ```
@@ -132,6 +138,41 @@ for (int i = 0; i < data.length; i++) {
 double[][] centroids = kmeans.getCentroids();
 ```
 
+### Data Preprocessing
+
+```java
+import com.mindforge.preprocessing.*;
+
+// Normalize features to [0, 1]
+double[][] data = {{1.0, 100.0}, {2.0, 200.0}, {3.0, 300.0}};
+MinMaxScaler scaler = new MinMaxScaler();
+scaler.fit(data);
+double[][] normalized = scaler.transform(data);
+
+// Standardize features (mean=0, std=1)
+StandardScaler standardScaler = new StandardScaler();
+standardScaler.fit(data);
+double[][] standardized = standardScaler.transform(data);
+
+// Handle missing values
+double[][] dataWithNaN = {{1.0, Double.NaN}, {2.0, 200.0}, {Double.NaN, 300.0}};
+SimpleImputer imputer = new SimpleImputer(SimpleImputer.Strategy.MEAN);
+imputer.fit(dataWithNaN);
+double[][] imputed = imputer.transform(dataWithNaN);
+
+// Encode categorical labels
+String[] labels = {"cat", "dog", "cat", "bird", "dog"};
+LabelEncoder encoder = new LabelEncoder();
+int[] encoded = encoder.encode(labels);
+String[] decoded = encoder.decode(encoded);
+
+// Split data into train/test sets
+double[][] X = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 4.0}, {4.0, 5.0}};
+int[] y = {0, 0, 1, 1};
+DataSplit.Split split = DataSplit.trainTestSplit(X, y, 0.25, 42);
+// Access: split.XTrain, split.XTest, split.yTrain, split.yTest
+```
+
 ## 🧪 Running Tests
 
 ```bash
@@ -140,7 +181,7 @@ mvn test
 
 All tests should pass:
 ```
-Tests run: 27, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 73, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
@@ -194,6 +235,54 @@ double[][] getCentroids()                             // Get cluster centroids
 double getInertia()                                   // Get within-cluster sum of squares
 ```
 
+### Preprocessing
+
+#### MinMaxScaler
+```java
+MinMaxScaler()                                        // Scale to [0, 1]
+MinMaxScaler(double min, double max)                  // Scale to custom range
+void fit(double[][] X)                                // Learn min/max from data
+double[][] transform(double[][] X)                    // Apply scaling
+double[][] fitTransform(double[][] X)                 // Fit and transform
+double[][] inverseTransform(double[][] X)             // Reverse scaling
+```
+
+#### StandardScaler
+```java
+StandardScaler()                                      // Constructor
+StandardScaler(boolean withMean, boolean withStd)     // Constructor with options
+void fit(double[][] X)                                // Learn mean and std
+double[][] transform(double[][] X)                    // Apply standardization
+double[][] fitTransform(double[][] X)                 // Fit and transform
+double[][] inverseTransform(double[][] X)             // Reverse standardization
+```
+
+#### SimpleImputer
+```java
+SimpleImputer(Strategy strategy)                      // MEAN, MEDIAN, MOST_FREQUENT, CONSTANT
+void fit(double[][] X)                                // Learn imputation values
+double[][] transform(double[][] X)                    // Apply imputation
+double[][] fitTransform(double[][] X)                 // Fit and transform
+void setFillValue(double value)                       // Set constant fill value
+```
+
+#### LabelEncoder
+```java
+LabelEncoder()                                        // Constructor
+int[] encode(String[] labels)                         // Encode string labels to integers
+String[] decode(int[] encodedLabels)                  // Decode integers back to strings
+int[] fitTransform(String[] labels)                   // Fit and transform
+String[] inverseTransform(int[] encodedLabels)        // Inverse transform
+```
+
+#### DataSplit
+```java
+static Split trainTestSplit(double[][] X, int[] y, double testSize, Integer randomState)
+static Split trainTestSplit(double[][] X, double[] y, double testSize, Integer randomState)
+static Split stratifiedSplit(double[][] X, int[] y, double testSize, Integer randomState)
+// Split class contains: XTrain, XTest, yTrain, yTest (int[] or double[])
+```
+
 ### Metrics
 
 #### Classification Metrics
@@ -227,8 +316,8 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - [ ] Decision Trees
 - [ ] Logistic Regression
 - [ ] Naive Bayes
-- [ ] Data preprocessing utilities
-- [ ] Train/Test split functionality
+- [x] Data preprocessing utilities (MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder)
+- [x] Train/Test split functionality (with stratified split support)
 
 ### Medium Term
 - [ ] Random Forest
@@ -248,7 +337,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0-SNAPSHOT
+- **Version**: 1.0.1-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
