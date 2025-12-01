@@ -8,7 +8,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 
 ## 🚀 Features
 
-- **Classification Algorithms**: K-Nearest Neighbors (KNN), and more coming soon
+- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, and more coming soon
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
 - **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
@@ -85,6 +85,40 @@ System.out.println("Prediction: " + prediction);
 int[] predictions = knn.predict(X_train);
 double accuracy = Metrics.accuracy(y_train, predictions);
 System.out.println("Accuracy: " + accuracy);
+```
+
+### Classification with Decision Trees
+
+```java
+import com.mindforge.classification.DecisionTreeClassifier;
+import com.mindforge.validation.Metrics;
+
+// Training data
+double[][] X_train = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {6.0, 5.0}, {7.0, 8.0}, {8.0, 7.0}};
+int[] y_train = {0, 0, 0, 1, 1, 1};
+
+// Create and train the model with custom parameters
+DecisionTreeClassifier tree = new DecisionTreeClassifier.Builder()
+    .maxDepth(5)
+    .minSamplesSplit(2)
+    .criterion(DecisionTreeClassifier.Criterion.GINI)
+    .build();
+tree.train(X_train, y_train);
+
+// Make predictions
+double[] testPoint = {5.0, 5.0};
+int prediction = tree.predict(testPoint);
+System.out.println("Prediction: " + prediction);
+
+// Get probability predictions
+double[] probabilities = tree.predictProba(testPoint);
+System.out.println("Class probabilities: " + Arrays.toString(probabilities));
+
+// Evaluate the model
+int[] predictions = tree.predict(X_train);
+double accuracy = Metrics.accuracy(y_train, predictions);
+System.out.println("Accuracy: " + accuracy);
+System.out.println("Tree depth: " + tree.getTreeDepth());
 ```
 
 ### Linear Regression
@@ -181,7 +215,7 @@ mvn test
 
 All tests should pass:
 ```
-Tests run: 73, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 96, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
@@ -208,6 +242,25 @@ KNearestNeighbors(int k, DistanceMetric metric)      // Constructor with custom 
 void train(double[][] X, int[] y)                     // Train the model
 int predict(double[] x)                               // Predict single instance
 int[] predict(double[][] X)                           // Predict multiple instances
+```
+
+#### DecisionTreeClassifier
+```java
+DecisionTreeClassifier()                              // Default constructor
+DecisionTreeClassifier.Builder()                      // Builder for custom configuration
+  .maxDepth(int depth)                                // Set maximum tree depth
+  .minSamplesSplit(int samples)                       // Set minimum samples to split
+  .minSamplesLeaf(int samples)                        // Set minimum samples per leaf
+  .criterion(Criterion criterion)                     // Set splitting criterion (GINI or ENTROPY)
+  .build()                                            // Build the classifier
+void train(double[][] X, int[] y)                     // Train the model
+int predict(double[] x)                               // Predict single instance
+int[] predict(double[][] X)                           // Predict multiple instances
+double[] predictProba(double[] x)                     // Get class probabilities for single instance
+double[][] predictProba(double[][] X)                 // Get class probabilities for multiple instances
+int getTreeDepth()                                    // Get actual tree depth
+int getNumLeaves()                                    // Get number of leaf nodes
+boolean isFitted()                                    // Check if model is trained
 ```
 
 ### Regression
@@ -313,7 +366,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 ## 🛣️ Roadmap
 
 ### Short Term
-- [ ] Decision Trees
+- [x] Decision Trees
 - [ ] Logistic Regression
 - [ ] Naive Bayes
 - [x] Data preprocessing utilities (MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder)
@@ -337,7 +390,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.1-alpha
+- **Version**: 1.0.2-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
