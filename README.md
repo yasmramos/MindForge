@@ -614,6 +614,39 @@ Tests run: 437, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
+## 📊 Code Coverage
+
+MindForge uses **JaCoCo** for code coverage analysis.
+
+### Current Coverage (v1.0.8-alpha)
+
+| Metric | Coverage |
+|--------|----------|
+| **Lines** | 96% |
+| **Branches** | 87% |
+| **Instructions** | 96% |
+
+### Running Coverage Reports
+
+```bash
+# Run tests with coverage
+mvn clean test
+
+# Generate HTML report
+mvn jacoco:report
+
+# Verify coverage thresholds
+mvn jacoco:check
+```
+
+The HTML report is generated at: `target/site/jacoco/index.html`
+
+### Coverage Thresholds
+
+The project enforces minimum coverage thresholds:
+- **Line Coverage**: 70% minimum
+- **Branch Coverage**: 60% minimum
+
 ## 🏗️ Building
 
 Compile the project:
@@ -820,6 +853,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - **ND4J 1.0.0-M2.1** - Numerical computing
 - **JUnit 5.10.1** - Testing framework
 - **SLF4J 2.0.9** - Logging facade
+- **JaCoCo 0.8.11** - Code coverage analysis
 
 ## 🤝 Contributing
 
