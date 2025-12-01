@@ -12,6 +12,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
 - **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
+- **Model Evaluation**: Cross-Validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split), Train-Test Split
 - **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, MSE, RMSE, MAE, R²
 - **Distance Functions**: Euclidean, Manhattan, Chebyshev, Minkowski
 - **Simple and Consistent Interface**: Intuitive APIs for all algorithms
@@ -204,6 +205,61 @@ System.out.println("Coefficients: " + Arrays.deepToString(coefficients));
 // View training history
 List<Double> lossHistory = lr.getLossHistory();
 System.out.println("Final loss: " + lossHistory.get(lossHistory.size() - 1));
+```
+
+### Cross-Validation
+
+```java
+import com.mindforge.classification.KNearestNeighbors;
+import com.mindforge.validation.CrossValidation;
+import com.mindforge.validation.CrossValidationResult;
+
+// Training data
+double[][] X = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {8.0, 8.0}, {9.0, 10.0}, {10.0, 11.0}};
+int[] y = {0, 0, 0, 1, 1, 1};
+
+// Define model trainer and predictor
+CrossValidation.ModelTrainer<KNearestNeighbors> trainer = (X_train, y_train) -> {
+    KNearestNeighbors knn = new KNearestNeighbors(3);
+    knn.train(X_train, y_train);
+    return knn;
+};
+
+CrossValidation.ModelPredictor<KNearestNeighbors> predictor = 
+    (model, X_test) -> model.predict(X_test);
+
+// K-Fold Cross-Validation
+CrossValidationResult kFoldResult = CrossValidation.kFold(
+    trainer, predictor, X, y, 5, 42
+);
+System.out.println("K-Fold Mean Accuracy: " + kFoldResult.getMean());
+System.out.println("K-Fold Std Dev: " + kFoldResult.getStdDev());
+
+// Stratified K-Fold (maintains class proportions)
+CrossValidationResult stratifiedResult = CrossValidation.stratifiedKFold(
+    trainer, predictor, X, y, 5, 42
+);
+System.out.println("Stratified K-Fold Mean: " + stratifiedResult.getMean());
+
+// Leave-One-Out Cross-Validation
+CrossValidationResult loocvResult = CrossValidation.leaveOneOut(
+    trainer, predictor, X, y
+);
+System.out.println("LOOCV Mean: " + loocvResult.getMean());
+
+// Shuffle Split Cross-Validation
+CrossValidationResult shuffleResult = CrossValidation.shuffleSplit(
+    trainer, predictor, X, y, 10, 0.2, 42
+);
+System.out.println("Shuffle Split Mean: " + shuffleResult.getMean());
+
+// Train-Test Split
+CrossValidation.SplitData split = CrossValidation.trainTestSplit(X, y, 0.3, 42);
+KNearestNeighbors model = new KNearestNeighbors(3);
+model.train(split.XTrain, split.yTrain);
+int[] predictions = model.predict(split.XTest);
+double accuracy = Metrics.accuracy(split.yTest, predictions);
+System.out.println("Test Accuracy: " + accuracy);
 ```
 
 ### Linear Regression
@@ -481,9 +537,11 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 ### Medium Term
 - [x] Random Forest
+- [x] Logistic Regression
+- [x] Cross-validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split)
+- [ ] Naive Bayes
 - [ ] Support Vector Machines (SVM)
 - [ ] Gradient Boosting
-- [ ] Cross-validation
 - [ ] Feature selection
 
 ### Long Term
@@ -497,7 +555,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.4-alpha
+- **Version**: 1.0.5-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
