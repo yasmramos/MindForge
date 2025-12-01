@@ -8,7 +8,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 
 ## 🚀 Features
 
-- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, and more coming soon
+- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, Naive Bayes (Gaussian, Multinomial, Bernoulli), Support Vector Machines (SVM), and more coming soon
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
 - **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
@@ -260,6 +260,84 @@ model.train(split.XTrain, split.yTrain);
 int[] predictions = model.predict(split.XTest);
 double accuracy = Metrics.accuracy(split.yTest, predictions);
 System.out.println("Test Accuracy: " + accuracy);
+```
+
+### Naive Bayes Classification
+
+```java
+import com.mindforge.classification.GaussianNaiveBayes;
+import com.mindforge.classification.MultinomialNaiveBayes;
+import com.mindforge.classification.BernoulliNaiveBayes;
+import com.mindforge.validation.Metrics;
+
+// === Gaussian Naive Bayes (for continuous features) ===
+double[][] X_continuous = {{-2.0, -2.0}, {-1.8, -2.2}, {2.0, 2.0}, {1.8, 2.2}};
+int[] y_continuous = {0, 0, 1, 1};
+
+GaussianNaiveBayes gnb = new GaussianNaiveBayes();
+gnb.train(X_continuous, y_continuous);
+
+int[] pred_gnb = gnb.predict(X_continuous);
+double[][] proba_gnb = gnb.predictProba(X_continuous);
+System.out.println("Gaussian Predictions: " + Arrays.toString(pred_gnb));
+
+// === Multinomial Naive Bayes (for count features, e.g., word counts) ===
+double[][] X_counts = {{5.0, 2.0, 0.0}, {0.0, 3.0, 5.0}, {6.0, 1.0, 0.0}, {0.0, 4.0, 6.0}};
+int[] y_counts = {0, 1, 0, 1};
+
+MultinomialNaiveBayes mnb = new MultinomialNaiveBayes(1.0); // alpha=1.0 (Laplace smoothing)
+mnb.train(X_counts, y_counts);
+
+int[] pred_mnb = mnb.predict(X_counts);
+System.out.println("Multinomial Predictions: " + Arrays.toString(pred_mnb));
+
+// === Bernoulli Naive Bayes (for binary features) ===
+double[][] X_binary = {{1.0, 0.0, 1.0}, {0.0, 1.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
+int[] y_binary = {0, 1, 0, 1};
+
+BernoulliNaiveBayes bnb = new BernoulliNaiveBayes(1.0); // alpha=1.0 for smoothing
+bnb.train(X_binary, y_binary);
+
+int[] pred_bnb = bnb.predict(X_binary);
+double[][] proba_bnb = bnb.predictProba(X_binary);
+System.out.println("Bernoulli Predictions: " + Arrays.toString(pred_bnb));
+```
+
+### Support Vector Machines (SVM)
+
+```java
+import com.mindforge.classification.SVC;
+import com.mindforge.validation.Metrics;
+
+// Training data
+double[][] X_svm = {
+    {-2.0, -2.0}, {-1.8, -2.2}, {-2.2, -1.8},
+    {2.0, 2.0}, {1.8, 2.2}, {2.2, 1.8}
+};
+int[] y_svm = {0, 0, 0, 1, 1, 1};
+
+// Create and train SVM with custom parameters
+SVC svc = new SVC.Builder()
+    .C(1.0)                   // Regularization parameter
+    .maxIter(1000)            // Maximum iterations
+    .tol(1e-3)                // Tolerance
+    .learningRate(0.01)       // Learning rate
+    .build();
+
+svc.train(X_svm, y_svm);
+
+// Make predictions
+int[] predictions = svc.predict(X_svm);
+System.out.println("SVM Predictions: " + Arrays.toString(predictions));
+
+// Get decision scores
+double[] scores = svc.decisionFunction(X_svm[0]);
+System.out.println("Decision scores: " + Arrays.toString(scores));
+
+// Access model parameters
+double[][] weights = svc.getWeights();
+double[] bias = svc.getBias();
+System.out.println("Number of classes: " + svc.getNumClasses());
 ```
 
 ### Linear Regression
@@ -539,8 +617,8 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - [x] Random Forest
 - [x] Logistic Regression
 - [x] Cross-validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split)
-- [ ] Naive Bayes
-- [ ] Support Vector Machines (SVM)
+- [x] Naive Bayes (Gaussian, Multinomial, Bernoulli)
+- [x] Support Vector Machines (Linear SVM)
 - [ ] Gradient Boosting
 - [ ] Feature selection
 
@@ -555,7 +633,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.5-alpha
+- **Version**: 1.0.6-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
