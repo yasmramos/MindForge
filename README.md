@@ -8,7 +8,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 
 ## 🚀 Features
 
-- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, Naive Bayes (Gaussian, Multinomial, Bernoulli), Support Vector Machines (SVM), and more coming soon
+- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, Naive Bayes (Gaussian, Multinomial, Bernoulli), Support Vector Machines (SVM), Gradient Boosting
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
 - **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
@@ -340,6 +340,49 @@ double[] bias = svc.getBias();
 System.out.println("Number of classes: " + svc.getNumClasses());
 ```
 
+### Gradient Boosting Classification
+
+```java
+import com.mindforge.classification.GradientBoostingClassifier;
+import com.mindforge.validation.Metrics;
+
+// Training data
+double[][] X_train = {
+    {0.0, 0.0}, {0.1, 0.1}, {0.2, 0.2},  // Class 0
+    {1.0, 1.0}, {1.1, 1.1}, {1.2, 1.2}   // Class 1
+};
+int[] y_train = {0, 0, 0, 1, 1, 1};
+
+// Create and train Gradient Boosting with custom parameters
+GradientBoostingClassifier gb = new GradientBoostingClassifier.Builder()
+    .nEstimators(100)           // Number of boosting stages
+    .learningRate(0.1)          // Shrinkage parameter
+    .maxDepth(3)                // Maximum depth of trees
+    .subsample(1.0)             // Fraction of samples for fitting
+    .randomState(42)            // For reproducibility
+    .build();
+
+gb.fit(X_train, y_train);
+
+// Make predictions
+int[] predictions = gb.predict(X_train);
+System.out.println("Predictions: " + Arrays.toString(predictions));
+
+// Get probability predictions
+double[][] probabilities = gb.predictProba(X_train);
+for (int i = 0; i < probabilities.length; i++) {
+    System.out.println("Sample " + i + " probabilities: " + Arrays.toString(probabilities[i]));
+}
+
+// Model information
+System.out.println("Number of trees: " + gb.getNumTrees());
+System.out.println("Classes: " + Arrays.toString(gb.getClasses()));
+
+// Evaluate
+double accuracy = Metrics.accuracy(y_train, predictions);
+System.out.println("Training accuracy: " + accuracy);
+```
+
 ### Linear Regression
 
 ```java
@@ -434,7 +477,7 @@ mvn test
 
 All tests should pass:
 ```
-Tests run: 96, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 285, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
@@ -619,7 +662,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - [x] Cross-validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split)
 - [x] Naive Bayes (Gaussian, Multinomial, Bernoulli)
 - [x] Support Vector Machines (Linear SVM)
-- [ ] Gradient Boosting
+- [x] Gradient Boosting
 - [ ] Feature selection
 
 ### Long Term
@@ -633,7 +676,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.6-alpha
+- **Version**: 1.0.7-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
