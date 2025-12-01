@@ -1,62 +1,96 @@
-# MindForge v1.0.0-alpha 🚀
+## 🚀 MindForge v1.0.1-alpha - Data Preprocessing Package
 
-This is the first alpha release of MindForge, a Machine Learning and AI library for Java.
+### ✨ New Features
 
-## 🎯 Features
+This version introduces a **complete data preprocessing package** (`com.mindforge.preprocessing`) that provides essential tools to prepare data before training machine learning models.
 
-### Classification Algorithms
-- **K-Nearest Neighbors (KNN)** - Configurable k parameter with multiple distance metrics support
+#### 📊 Core Components
 
-### Regression Algorithms
-- **Linear Regression** - Gradient descent optimization with configurable learning rate
+**1. MinMaxScaler** - Feature Normalization
+- Scales features to the range [0, 1] or a custom range
+- Preserves relationships between values
+- Methods: `fit()`, `transform()`, `fitTransform()`, `inverseTransform()`
 
-### Clustering Algorithms
-- **K-Means** - K-means++ initialization for improved convergence
+**2. StandardScaler** - Standardization
+- Transforms data to mean = 0 and standard deviation = 1
+- Ideal for scale-sensitive algorithms (KNN, SVM, neural networks)
+- Methods: `fit()`, `transform()`, `fitTransform()`, `inverseTransform()`
 
-### Evaluation Metrics
-- **Classification Metrics**: Accuracy, Precision, Recall, F1-Score, Confusion Matrix
-- **Regression Metrics**: MSE, RMSE, MAE, R² Score
+**3. SimpleImputer** - Missing Value Handling
+- Available strategies:
+  - `MEAN`: Mean imputation
+  - `MEDIAN`: Median imputation
+  - `MOST_FREQUENT`: Mode imputation
+  - `CONSTANT`: Constant value imputation
+- Supports `NaN` and `null` values
 
-### Distance Functions
-- Euclidean, Manhattan, Chebyshev, Minkowski distances
+**4. LabelEncoder** - Categorical Label Encoding
+- Converts text labels to integers
+- Bidirectional: `encode()` and `decode()`
+- Maintains consistent mapping for inverse transformations
 
-## 📦 Installation
+**5. DataSplit** - Dataset Splitting
+- `trainTestSplit()`: Random train/test split
+- `stratifiedSplit()`: Stratified split preserving class distribution
+- Supports both integer and continuous labels
+- Random control with `randomState`
 
-### Maven
-Add this to your `pom.xml`:
+### 📈 Test Coverage
+
+- **73 tests** passing successfully
+- Complete coverage of all preprocessing components
+- Edge case and error handling tests
+
+### 📖 Documentation
+
+- Updated README with usage examples
+- Inline code documentation
+- Detailed guide in `PREPROCESSING_README.md`
+
+### 🔧 Quick Start
+
+```java
+import com.mindforge.preprocessing.*;
+
+// Normalization
+MinMaxScaler scaler = new MinMaxScaler();
+scaler.fit(data);
+double[][] normalized = scaler.transform(data);
+
+// Standardization
+StandardScaler standardScaler = new StandardScaler();
+double[][] standardized = standardScaler.fitTransform(data);
+
+// Imputation
+SimpleImputer imputer = new SimpleImputer(SimpleImputer.Strategy.MEAN);
+double[][] cleaned = imputer.fitTransform(dataWithNaN);
+
+// Encoding
+LabelEncoder encoder = new LabelEncoder();
+int[] encoded = encoder.encode(labels);
+
+// Data splitting
+DataSplit.Split split = DataSplit.trainTestSplit(X, y, 0.25, 42);
+```
+
+### 📦 Installation
 
 ```xml
 <dependency>
     <groupId>com.mindforge</groupId>
     <artifactId>mindforge</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.1-alpha</version>
 </dependency>
 ```
 
-You also need to configure the GitHub Packages repository:
+### 🔗 Resources
 
-```xml
-<repositories>
-    <repository>
-        <id>github</id>
-        <url>https://maven.pkg.github.com/yasmramos/MindForge</url>
-    </repository>
-</repositories>
-```
-
-## 🧪 Testing
-All 27 unit tests passing ✅
-
-## ⚠️ Alpha Release Notice
-This is an alpha release intended for testing and feedback. The API may change in future versions.
-
-## 📝 What's Next
-- Decision Trees
-- Logistic Regression  
-- Naive Bayes
-- Data Preprocessing utilities
-- Cross-validation support
+- [Main README](README.md)
+- [Preprocessing Guide](PREPROCESSING_README.md)
+- [Repository](https://github.com/yasmramos/MindForge)
 
 ---
 
-**Full Changelog**: Initial release
+**Author**: MindForge Team  
+**Version**: 1.0.1-alpha  
+**Date**: December 2025

@@ -1,84 +1,84 @@
 # Data Preprocessing Package
 
-El paquete `com.mindforge.preprocessing` proporciona herramientas esenciales para preparar datos antes del entrenamiento de modelos de machine learning.
+The `com.mindforge.preprocessing` package provides essential tools to prepare data before training machine learning models.
 
-## 📦 Clases Implementadas
+## 📦 Implemented Classes
 
 ### 1. **MinMaxScaler**
-Escala las características a un rango específico (predeterminado: [0, 1]).
+Scales features to a specific range (default: [0, 1]).
 
-**Uso:**
+**Usage:**
 ```java
 double[][] data = {{1.0, 2.0}, {2.0, 4.0}, {3.0, 6.0}};
-MinMaxScaler scaler = new MinMaxScaler(); // Rango [0, 1]
-// O con rango personalizado:
+MinMaxScaler scaler = new MinMaxScaler(); // Range [0, 1]
+// Or with custom range:
 // MinMaxScaler scaler = new MinMaxScaler(-1.0, 1.0);
 
 double[][] scaled = scaler.fitTransform(data);
-// Para datos nuevos:
+// For new data:
 double[][] testScaled = scaler.transform(testData);
-// Reversión:
+// Inverse transformation:
 double[][] original = scaler.inverseTransform(scaled);
 ```
 
-**Métodos:**
-- `fit(double[][] X)` - Calcula min y max de cada característica
-- `transform(double[][] X)` - Escala los datos
-- `fitTransform(double[][] X)` - Fit y transform en un paso
-- `inverseTransform(double[][] X)` - Revierte la escala
-- `getFeatureMin()` - Obtiene valores mínimos
-- `getFeatureMax()` - Obtiene valores máximos
+**Methods:**
+- `fit(double[][] X)` - Computes min and max of each feature
+- `transform(double[][] X)` - Scales the data
+- `fitTransform(double[][] X)` - Fit and transform in one step
+- `inverseTransform(double[][] X)` - Reverses the scaling
+- `getFeatureMin()` - Gets minimum values
+- `getFeatureMax()` - Gets maximum values
 
 ---
 
 ### 2. **StandardScaler**
-Estandariza características removiendo la media y escalando a varianza unitaria (Z-score normalization).
+Standardizes features by removing the mean and scaling to unit variance (Z-score normalization).
 
-**Uso:**
+**Usage:**
 ```java
 double[][] data = {{0.0, 0.0}, {1.0, 1.0}, {2.0, 2.0}};
 StandardScaler scaler = new StandardScaler();
-// O con opciones:
+// Or with options:
 // StandardScaler scaler = new StandardScaler(true, true);  // withMean, withStd
 
 double[][] scaled = scaler.fitTransform(data);
 double[][] original = scaler.inverseTransform(scaled);
 ```
 
-**Métodos:**
-- `fit(double[][] X)` - Calcula media y desviación estándar
-- `transform(double[][] X)` - Estandariza los datos
-- `fitTransform(double[][] X)` - Fit y transform en un paso
-- `inverseTransform(double[][] X)` - Revierte la estandarización
-- `getMean()` - Obtiene las medias
-- `getStd()` - Obtiene las desviaciones estándar
+**Methods:**
+- `fit(double[][] X)` - Computes mean and standard deviation
+- `transform(double[][] X)` - Standardizes the data
+- `fitTransform(double[][] X)` - Fit and transform in one step
+- `inverseTransform(double[][] X)` - Reverses the standardization
+- `getMean()` - Gets the means
+- `getStd()` - Gets the standard deviations
 
 ---
 
 ### 3. **DataSplit**
-Divide conjuntos de datos en train y test.
+Splits datasets into train and test sets.
 
-**Uso - Clasificación:**
+**Usage - Classification:**
 ```java
 double[][] X = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 4.0}, {4.0, 5.0}};
 int[] y = {0, 0, 1, 1};
 
-// Split simple
+// Simple split
 DataSplit.TrainTestSplit split = DataSplit.trainTestSplit(
     X, y, 
-    0.25,      // 25% para test
+    0.25,      // 25% for test
     true,      // shuffle
-    42         // random seed (null para aleatorio)
+    42         // random seed (null for random)
 );
 
-// Acceder a los datos
+// Access the data
 double[][] XTrain = split.XTrain;
 double[][] XTest = split.XTest;
 int[] yTrain = split.yTrain;
 int[] yTest = split.yTest;
 ```
 
-**Uso - Regresión:**
+**Usage - Regression:**
 ```java
 double[][] X = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 4.0}, {4.0, 5.0}};
 double[] y = {1.5, 2.5, 3.5, 4.5};
@@ -87,13 +87,13 @@ DataSplit.TrainTestSplitRegression split = DataSplit.trainTestSplit(
     X, y, 0.25, true, 42
 );
 
-double[] yTrain = split.yTrain;  // Tipo double para regresión
+double[] yTrain = split.yTrain;  // Type double for regression
 double[] yTest = split.yTest;
 ```
 
-**Uso - Split Estratificado:**
+**Usage - Stratified Split:**
 ```java
-// Mantiene la proporción de clases en train y test
+// Maintains class proportion in train and test
 DataSplit.TrainTestSplit split = DataSplit.stratifiedTrainTestSplit(
     X, y,
     0.25,   // test size
@@ -101,23 +101,23 @@ DataSplit.TrainTestSplit split = DataSplit.stratifiedTrainTestSplit(
 );
 ```
 
-**Métodos:**
-- `trainTestSplit(X, y, testSize, shuffle, seed)` - Split simple (clasificación)
-- `trainTestSplit(X, y, testSize, shuffle, seed)` - Split simple (regresión)
-- `stratifiedTrainTestSplit(X, y, testSize, seed)` - Split estratificado
+**Methods:**
+- `trainTestSplit(X, y, testSize, shuffle, seed)` - Simple split (classification)
+- `trainTestSplit(X, y, testSize, shuffle, seed)` - Simple split (regression)
+- `stratifiedTrainTestSplit(X, y, testSize, seed)` - Stratified split
 
 ---
 
 ### 4. **SimpleImputer**
-Completa valores faltantes (NaN) en datasets.
+Fills missing values (NaN) in datasets.
 
-**Estrategias disponibles:**
-- `MEAN` - Reemplaza con la media
-- `MEDIAN` - Reemplaza con la mediana
-- `MOST_FREQUENT` - Reemplaza con el valor más frecuente
-- `CONSTANT` - Reemplaza con un valor constante
+**Available strategies:**
+- `MEAN` - Replaces with the mean
+- `MEDIAN` - Replaces with the median
+- `MOST_FREQUENT` - Replaces with the most frequent value
+- `CONSTANT` - Replaces with a constant value
 
-**Uso:**
+**Usage:**
 ```java
 double[][] data = {
     {1.0, 2.0},
@@ -126,183 +126,183 @@ double[][] data = {
     {4.0, 6.0}
 };
 
-// Imputación por media
+// Mean imputation
 SimpleImputer imputer = new SimpleImputer(SimpleImputer.ImputeStrategy.MEAN);
 double[][] filled = imputer.fitTransform(data);
 
-// Imputación con valor constante
+// Constant value imputation
 SimpleImputer imputer2 = new SimpleImputer(
     SimpleImputer.ImputeStrategy.CONSTANT, 
-    0.0  // valor constante
+    0.0  // constant value
 );
 double[][] filled2 = imputer2.fitTransform(data);
 ```
 
-**Métodos:**
-- `fit(double[][] X)` - Calcula estadísticas de imputación
-- `transform(double[][] X)` - Rellena valores faltantes
-- `fitTransform(double[][] X)` - Fit y transform en un paso
-- `getStatistics()` - Obtiene los valores de imputación calculados
+**Methods:**
+- `fit(double[][] X)` - Computes imputation statistics
+- `transform(double[][] X)` - Fills missing values
+- `fitTransform(double[][] X)` - Fit and transform in one step
+- `getStatistics()` - Gets the computed imputation values
 
 ---
 
 ### 5. **LabelEncoder**
-Codifica etiquetas categóricas a valores numéricos.
+Encodes categorical labels to numeric values.
 
-**Uso:**
+**Usage:**
 ```java
 String[] labels = {"cat", "dog", "cat", "bird", "dog"};
 
 LabelEncoder encoder = new LabelEncoder();
 int[] encoded = encoder.fitTransform(labels);
-// Resultado: [0, 1, 0, 2, 1]
+// Result: [0, 1, 0, 2, 1]
 
-// Decodificar de vuelta
+// Decode back
 String[] decoded = encoder.inverseTransform(encoded);
-// Resultado: ["cat", "dog", "cat", "bird", "dog"]
+// Result: ["cat", "dog", "cat", "bird", "dog"]
 
-// Codificar valores individuales
+// Encode individual values
 int catCode = encoder.encode("cat");        // 0
 String label = encoder.decode(1);           // "dog"
 
-// Obtener información
+// Get information
 String[] classes = encoder.getClasses();    // ["cat", "dog", "bird"]
 int numClasses = encoder.getNumClasses();   // 3
 ```
 
-**Métodos:**
-- `fit(String[] labels)` - Aprende el mapeo de etiquetas
-- `transform(String[] labels)` - Codifica etiquetas a enteros
-- `fitTransform(String[] labels)` - Fit y transform en un paso
-- `inverseTransform(int[] encoded)` - Decodifica a etiquetas originales
-- `encode(String label)` - Codifica una etiqueta individual
-- `decode(int encoded)` - Decodifica un valor individual
-- `getClasses()` - Obtiene todas las clases únicas
-- `getNumClasses()` - Obtiene el número de clases
+**Methods:**
+- `fit(String[] labels)` - Learns the label mapping
+- `transform(String[] labels)` - Encodes labels to integers
+- `fitTransform(String[] labels)` - Fit and transform in one step
+- `inverseTransform(int[] encoded)` - Decodes to original labels
+- `encode(String label)` - Encodes a single label
+- `decode(int encoded)` - Decodes a single value
+- `getClasses()` - Gets all unique classes
+- `getNumClasses()` - Gets the number of classes
 
 ---
 
-## 🔄 Flujo de Trabajo Típico
+## 🔄 Typical Workflow
 
-### Para Clasificación:
+### For Classification:
 
 ```java
-// 1. Cargar datos
+// 1. Load data
 double[][] X = loadData();
 int[] y = loadLabels();
 
-// 2. Imputar valores faltantes (si existen)
+// 2. Impute missing values (if any)
 SimpleImputer imputer = new SimpleImputer(ImputeStrategy.MEAN);
 X = imputer.fitTransform(X);
 
-// 3. Dividir en train/test
+// 3. Split into train/test
 DataSplit.TrainTestSplit split = DataSplit.stratifiedTrainTestSplit(X, y, 0.2, 42);
 
-// 4. Escalar características (en train)
+// 4. Scale features (on train)
 StandardScaler scaler = new StandardScaler();
 double[][] XTrainScaled = scaler.fitTransform(split.XTrain);
 
-// 5. Aplicar el mismo escalado a test (sin re-fit)
+// 5. Apply the same scaling to test (without re-fitting)
 double[][] XTestScaled = scaler.transform(split.XTest);
 
-// 6. Entrenar modelo
+// 6. Train model
 KNearestNeighbors model = new KNearestNeighbors(5);
 model.train(XTrainScaled, split.yTrain);
 
-// 7. Evaluar
+// 7. Evaluate
 int[] predictions = model.predict(XTestScaled);
 double accuracy = Metrics.accuracy(split.yTest, predictions);
 ```
 
-### Para Regresión:
+### For Regression:
 
 ```java
-// 1. Cargar datos
+// 1. Load data
 double[][] X = loadData();
 double[] y = loadTargets();
 
 // 2. Split
 DataSplit.TrainTestSplitRegression split = DataSplit.trainTestSplit(X, y, 0.2, true, 42);
 
-// 3. Escalar
+// 3. Scale
 MinMaxScaler scaler = new MinMaxScaler();
 double[][] XTrainScaled = scaler.fitTransform(split.XTrain);
 double[][] XTestScaled = scaler.transform(split.XTest);
 
-// 4. Entrenar
+// 4. Train
 LinearRegression model = new LinearRegression();
 model.train(XTrainScaled, split.yTrain);
 
-// 5. Evaluar
+// 5. Evaluate
 double[] predictions = model.predict(XTestScaled);
 double rmse = Metrics.rmse(split.yTest, predictions);
 ```
 
-### Codificación de Labels:
+### Label Encoding:
 
 ```java
-// Si tienes etiquetas categóricas como String
+// If you have categorical labels as String
 String[] categoricalLabels = {"red", "green", "blue", "red", "green"};
 
 LabelEncoder encoder = new LabelEncoder();
 int[] numericLabels = encoder.fitTransform(categoricalLabels);
 
-// Usar numericLabels para entrenar modelos
+// Use numericLabels to train models
 // ...
 
-// Convertir predicciones de vuelta a labels originales
+// Convert predictions back to original labels
 String[] predictedLabels = encoder.inverseTransform(predictions);
 ```
 
 ---
 
-## ⚠️ Buenas Prácticas
+## ⚠️ Best Practices
 
-1. **Siempre fit en train, transform en test:**
+1. **Always fit on train, transform on test:**
    ```java
-   scaler.fit(XTrain);           // ✓ Correcto
+   scaler.fit(XTrain);           // ✓ Correct
    XTrain = scaler.transform(XTrain);
-   XTest = scaler.transform(XTest);  // ✓ Usa mismos parámetros
+   XTest = scaler.transform(XTest);  // ✓ Uses same parameters
    
-   // ✗ INCORRECTO: No hacer fit en test
-   scaler.fit(XTest);  // ✗ Causa data leakage
+   // ✗ INCORRECT: Don't fit on test
+   scaler.fit(XTest);  // ✗ Causes data leakage
    ```
 
-2. **Manejar valores faltantes antes de escalar:**
+2. **Handle missing values before scaling:**
    ```java
-   X = imputer.fitTransform(X);    // Primero imputar
-   X = scaler.fitTransform(X);     // Luego escalar
+   X = imputer.fitTransform(X);    // First impute
+   X = scaler.fitTransform(X);     // Then scale
    ```
 
-3. **Usar stratified split para datos desbalanceados:**
+3. **Use stratified split for imbalanced data:**
    ```java
-   // Si tienes 90% clase A y 10% clase B
+   // If you have 90% class A and 10% class B
    split = DataSplit.stratifiedTrainTestSplit(X, y, 0.2, 42);
-   // Mantiene la proporción 90/10 en train y test
+   // Maintains the 90/10 proportion in train and test
    ```
 
-4. **Guardar scalers y encoders para producción:**
+4. **Save scalers and encoders for production:**
    ```java
-   // En producción, necesitarás los mismos transformadores
+   // In production, you'll need the same transformers
    StandardScaler scaler = trainScaler();
    LabelEncoder encoder = trainEncoder();
-   // Guardar estos objetos para usar en predicciones futuras
+   // Save these objects to use in future predictions
    ```
 
 ---
 
 ## 📊 Tests
 
-Todas las clases incluyen tests comprehensivos:
+All classes include comprehensive tests:
 - `MinMaxScalerTest` - 8 tests
 - `StandardScalerTest` - 8 tests
 - `DataSplitTest` - 9 tests
 - `SimpleImputerTest` - 9 tests
 - `LabelEncoderTest` - 13 tests
 
-**Total: 47 tests de preprocessing**
+**Total: 47 preprocessing tests**
 
-Ejecutar tests:
+Run tests:
 ```bash
 mvn test -Dtest="com.mindforge.preprocessing.*"
 ```
