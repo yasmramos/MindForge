@@ -8,7 +8,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 
 ## 🚀 Features
 
-- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, and more coming soon
+- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, and more coming soon
 - **Regression Algorithms**: Linear Regression, and more coming soon
 - **Clustering Algorithms**: K-Means, and more coming soon
 - **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
@@ -161,6 +161,49 @@ System.out.println("Out-of-bag score: " + oobScore);
 // Get feature importance
 double[] importance = rf.getFeatureImportance();
 System.out.println("Feature importance: " + Arrays.toString(importance));
+```
+
+### Logistic Regression Classification
+
+```java
+import io.mindforge.classification.LogisticRegression;
+import com.mindforge.validation.Metrics;
+
+// Training data
+double[][] X_train = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {8.0, 8.0}, {9.0, 10.0}, {10.0, 11.0}};
+int[] y_train = {0, 0, 0, 1, 1, 1};
+
+// Create and train Logistic Regression with L2 regularization
+LogisticRegression lr = new LogisticRegression.Builder()
+    .penalty("l2")                 // Regularization: "l1", "l2", "elasticnet", "none"
+    .C(1.0)                        // Inverse regularization strength
+    .solver("gradient_descent")    // Solver: "gradient_descent", "sgd", "newton_cg"
+    .learningRate(0.1)             // Learning rate
+    .maxIter(1000)                 // Maximum iterations
+    .tol(1e-4)                     // Convergence tolerance
+    .randomState(42)               // For reproducibility
+    .build();
+
+lr.fit(X_train, y_train);
+
+// Make predictions
+double[][] X_test = {{5.0, 5.0}, {2.0, 2.5}};
+int[] predictions = lr.predict(X_test);
+System.out.println("Predictions: " + Arrays.toString(predictions));
+
+// Get probability predictions
+double[][] probabilities = lr.predictProba(X_test);
+for (int i = 0; i < probabilities.length; i++) {
+    System.out.println("Sample " + i + " probabilities: " + Arrays.toString(probabilities[i]));
+}
+
+// Access model parameters
+double[][] coefficients = lr.getCoefficients();
+System.out.println("Coefficients: " + Arrays.deepToString(coefficients));
+
+// View training history
+List<Double> lossHistory = lr.getLossHistory();
+System.out.println("Final loss: " + lossHistory.get(lossHistory.size() - 1));
 ```
 
 ### Linear Regression
@@ -431,7 +474,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 ### Short Term
 - [x] Decision Trees
-- [ ] Logistic Regression
+- [x] Logistic Regression
 - [ ] Naive Bayes
 - [x] Data preprocessing utilities (MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder)
 - [x] Train/Test split functionality (with stratified split support)
@@ -454,7 +497,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.3-alpha
+- **Version**: 1.0.4-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
