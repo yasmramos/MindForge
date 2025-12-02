@@ -5,8 +5,8 @@ This directory contains practical examples demonstrating how to use the MindForg
 ## Quick Start
 
 ```bash
-# From the MindForge root directory, build the library first
-mvn clean package -DskipTests
+# From the MindForge root directory, build and install the library first
+mvn clean install -DskipTests
 
 # Then run examples
 cd examples
@@ -29,13 +29,57 @@ mvn exec:java -Dexec.mainClass="com.mindforge.examples.QuickStart"
 
 ### 2. ClusteringExample.java
 K-Means clustering demonstration:
-- Synthetic data generation
-- Comparing different k values
-- Inertia (within-cluster sum of squares)
+- Synthetic data generation with multiple clusters
+- Comparing different k values (elbow method)
+- Computing inertia for cluster evaluation
 - Practical customer segmentation example
 
 ```bash
 mvn exec:java -Dexec.mainClass="com.mindforge.examples.ClusteringExample"
+```
+
+### 3. RegressionExample.java
+Regression algorithms demonstration:
+- Linear Regression for continuous prediction
+- Ridge Regression with L2 regularization
+- Evaluation metrics (MSE, RMSE, MAE, R²)
+- Practical house price prediction example
+
+```bash
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.RegressionExample"
+```
+
+### 4. PreprocessingExample.java
+Data preprocessing techniques:
+- StandardScaler (z-score normalization)
+- MinMaxScaler (range scaling to [0,1] or custom range)
+- LabelEncoder (categorical to numeric conversion)
+- Practical employee data preprocessing example
+
+```bash
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.PreprocessingExample"
+```
+
+### 5. PipelineExample.java
+ML Pipelines demonstration:
+- Chaining transformers and classifiers
+- Comparing different model pipelines
+- Pipeline benefits and best practices
+- Train/test workflow management
+
+```bash
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.PipelineExample"
+```
+
+### 6. ValidationExample.java
+Model validation techniques:
+- K-Fold Cross Validation
+- Model comparison using CV
+- Classification metrics (Accuracy, Precision, Recall, F1)
+- Confusion matrix breakdown
+
+```bash
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.ValidationExample"
 ```
 
 ## Project Structure
@@ -46,34 +90,57 @@ examples/
 ├── README.md                         # This file
 └── src/main/java/com/mindforge/examples/
     ├── QuickStart.java               # Basic ML workflow tutorial
-    └── ClusteringExample.java        # K-Means clustering example
+    ├── ClusteringExample.java        # K-Means clustering example
+    ├── RegressionExample.java        # Linear & Ridge regression
+    ├── PreprocessingExample.java     # Data preprocessing techniques
+    ├── PipelineExample.java          # ML pipelines
+    └── ValidationExample.java        # Cross-validation & metrics
 ```
 
 ## Requirements
 
 - Java 11 or higher
 - Maven 3.6+
-- MindForge library (built from parent project)
+- MindForge library (installed via `mvn install` from parent project)
 
 ## Building and Running
 
 ```bash
 # From MindForge root directory
-# 1. Build the main library
-mvn clean package -DskipTests
+# 1. Build and install the main library
+mvn clean install -DskipTests
 
 # 2. Run examples
 cd examples
 mvn compile
 
-# 3. Run specific example
+# 3. Run all examples
 mvn exec:java -Dexec.mainClass="com.mindforge.examples.QuickStart"
 mvn exec:java -Dexec.mainClass="com.mindforge.examples.ClusteringExample"
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.RegressionExample"
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.PreprocessingExample"
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.PipelineExample"
+mvn exec:java -Dexec.mainClass="com.mindforge.examples.ValidationExample"
 ```
 
 ## Using MindForge in Your Own Project
 
-Download the JAR from the [releases page](https://github.com/yasmramos/MindForge/releases) and add it to your classpath.
+Download the JAR from the [releases page](https://github.com/yasmramos/MindForge/releases) and add it to your classpath, or add it to your local Maven repository:
+
+```bash
+mvn install:install-file -Dfile=mindforge-1.1.0-alpha.jar \
+    -DgroupId=com.mindforge -DartifactId=mindforge \
+    -Dversion=1.1.0-alpha -Dpackaging=jar
+```
+
+Then add to your `pom.xml`:
+```xml
+<dependency>
+    <groupId>com.mindforge</groupId>
+    <artifactId>mindforge</artifactId>
+    <version>1.1.0-alpha</version>
+</dependency>
+```
 
 ## Common Patterns
 
@@ -96,8 +163,11 @@ double[][] XTest = scaler.transform(split.XTest);
 KNearestNeighbors knn = new KNearestNeighbors(5);
 knn.train(XTrain, split.yTrain);
 
-// 5. Predict and evaluate
-int[] predictions = knn.predict(XTest);
+// 5. Predict
+int[] predictions = new int[XTest.length];
+for (int i = 0; i < XTest.length; i++) {
+    predictions[i] = knn.predict(XTest[i]);
+}
 double accuracy = Metrics.accuracy(split.yTest, predictions);
 ```
 
@@ -105,9 +175,36 @@ double accuracy = Metrics.accuracy(split.yTest, predictions);
 ```java
 // K-Means with 3 clusters
 KMeans kmeans = new KMeans(3, 100, new Random(42));
-int[] labels = kmeans.fitPredict(X);
+int[] labels = kmeans.cluster(X);
 double[][] centroids = kmeans.getCentroids();
-double inertia = kmeans.getInertia();
+```
+
+### Regression
+```java
+LinearRegression lr = new LinearRegression();
+lr.train(XTrain, yTrain);
+double prediction = lr.predict(xNew);
+double r2 = Metrics.r2Score(yTest, predictions);
+```
+
+### Cross-Validation
+```java
+CrossValidationResult result = CrossValidation.kFold(
+    (xTrain, yTrain) -> {
+        KNearestNeighbors knn = new KNearestNeighbors(5);
+        knn.train(xTrain, yTrain);
+        return knn;
+    },
+    (model, xTest) -> {
+        int[] preds = new int[xTest.length];
+        for (int i = 0; i < xTest.length; i++) {
+            preds[i] = model.predict(xTest[i]);
+        }
+        return preds;
+    },
+    X, y, 5, 42  // 5-fold CV with seed 42
+);
+System.out.println("Mean Accuracy: " + result.getMean());
 ```
 
 ## MindForge Features
@@ -119,9 +216,15 @@ double inertia = kmeans.getInertia();
 - Gradient Boosting
 - Naive Bayes (Gaussian, Multinomial, Bernoulli)
 - SVM (SVC)
-- Logistic Regression
 - AdaBoost
 - Ensemble methods (Voting, Bagging, Stacking)
+
+**Regression:**
+- Linear Regression
+- Ridge Regression
+- Lasso Regression
+- Elastic Net
+- Polynomial Regression
 
 **Clustering:**
 - K-Means
@@ -135,12 +238,27 @@ double inertia = kmeans.getInertia();
 - LabelEncoder
 - OneHotEncoder
 - SimpleImputer
+- PolynomialFeatures
+
+**Dimensionality Reduction:**
 - PCA
+
+**Feature Selection:**
+- SelectKBest
+- VarianceThreshold
+- RFE (Recursive Feature Elimination)
+
+**Pipelines:**
+- Pipeline (chaining transformers and estimators)
+- ColumnTransformer
+- GridSearchCV
 
 **Validation:**
 - Train/Test Split
-- Cross-Validation
-- Metrics (Accuracy, Precision, Recall, F1, MSE, RMSE, R2)
+- K-Fold Cross-Validation
+- Stratified K-Fold
+- Leave-One-Out
+- Metrics (Accuracy, Precision, Recall, F1, MSE, RMSE, MAE, R²)
 
 ## License
 

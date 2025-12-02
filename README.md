@@ -2,23 +2,82 @@
 
 A Machine Learning and Artificial Intelligence library for Java, inspired by libraries like Smile, designed to be easy to use and efficient.
 
+[![Build Status](https://github.com/yasmramos/MindForge/actions/workflows/ci.yml/badge.svg)](https://github.com/yasmramos/MindForge/actions/workflows/ci.yml)
 [![Java Version](https://img.shields.io/badge/Java-17%2B-blue)](https://www.oracle.com/java/)
 [![Maven](https://img.shields.io/badge/Maven-3.6%2B-red)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-TBD-yellow)](LICENSE)
 
+## ⚡ Quick Start
+
+Get started with MindForge in minutes! Here's a complete example that demonstrates classification, regression, and clustering:
+
+```java
+import com.mindforge.classification.*;
+import com.mindforge.regression.LinearRegression;
+import com.mindforge.clustering.KMeans;
+import com.mindforge.preprocessing.StandardScaler;
+import com.mindforge.validation.Metrics;
+
+public class QuickStart {
+    public static void main(String[] args) {
+        // === CLASSIFICATION with KNN ===
+        double[][] X_class = {{1,2}, {2,3}, {3,3}, {6,5}, {7,8}, {8,7}};
+        int[] y_class = {0, 0, 0, 1, 1, 1};
+        
+        KNearestNeighbors knn = new KNearestNeighbors(3);
+        knn.train(X_class, y_class);
+        System.out.println("KNN Accuracy: " + Metrics.accuracy(y_class, knn.predict(X_class)) * 100 + "%");
+        
+        // === REGRESSION ===
+        double[][] X_reg = {{1}, {2}, {3}, {4}, {5}};
+        double[] y_reg = {2.1, 4.0, 5.9, 8.1, 10.0};
+        
+        LinearRegression lr = new LinearRegression();
+        lr.train(X_reg, y_reg);
+        System.out.println("Prediction for x=6: " + lr.predict(new double[]{6}));
+        
+        // === CLUSTERING ===
+        double[][] data = {{1,2}, {1.5,1.8}, {5,8}, {8,8}, {1,0.6}, {9,11}};
+        
+        KMeans kmeans = new KMeans(2);
+        kmeans.fit(data, 2);
+        int[] clusters = kmeans.cluster(data);
+        System.out.println("Cluster assignments: " + java.util.Arrays.toString(clusters));
+        
+        // === PREPROCESSING ===
+        StandardScaler scaler = new StandardScaler();
+        scaler.fit(X_class);
+        double[][] X_scaled = scaler.transform(X_class);
+        System.out.println("Scaled first sample: " + java.util.Arrays.toString(X_scaled[0]));
+    }
+}
+```
+
+> 📚 **More Examples**: Check out our [comprehensive examples](examples/README.md) including Regression, Preprocessing, Pipelines, and Cross-Validation!
+
 ## 🚀 Features
 
-- **Classification Algorithms**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, Naive Bayes (Gaussian, Multinomial, Bernoulli), Support Vector Machines (SVM), Gradient Boosting
-- **Regression Algorithms**: Linear Regression, and more coming soon
-- **Clustering Algorithms**: K-Means, and more coming soon
-- **Data Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
+### Core Algorithms
+- **Classification**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, Naive Bayes (Gaussian, Multinomial, Bernoulli), Support Vector Machines (SVM), Gradient Boosting
+- **Regression**: Linear Regression, Ridge Regression (L2 regularization)
+- **Clustering**: K-Means with multiple initialization strategies
+
+### Data Processing
+- **Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
 - **Feature Selection**: VarianceThreshold, SelectKBest (F-test, Chi2, Mutual Info), RFE (Recursive Feature Elimination)
 - **Dimensionality Reduction**: PCA (Principal Component Analysis)
-- **Model Persistence**: Save/Load models to disk or byte arrays
-- **Model Evaluation**: Cross-Validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split), Train-Test Split
-- **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, MSE, RMSE, MAE, R²
+- **Pipelines**: Chain transformers and estimators for streamlined workflows
+
+### Model Management
+- **Persistence**: Save/Load models to disk or byte arrays
+- **Validation**: Cross-Validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split), Train-Test Split
+- **Metrics**: Accuracy, Precision, Recall, F1-Score, Confusion Matrix, MSE, RMSE, MAE, R²
 - **Distance Functions**: Euclidean, Manhattan, Chebyshev, Minkowski
-- **Simple and Consistent Interface**: Intuitive APIs for all algorithms
+
+### Developer Experience
+- **6 Comprehensive Examples**: QuickStart, Clustering, Regression, Preprocessing, Pipelines, Validation
+- **Simple and Consistent API**: Intuitive interfaces across all algorithms
+- **CI/CD Integration**: Automated testing with GitHub Actions
 
 ## 📦 Project Structure
 
@@ -64,13 +123,35 @@ MindForge/
 
 ## 📥 Installation
 
-Clone the repository and build the project:
+### Option 1: Download JAR (Recommended)
+
+Download the latest release from [GitHub Releases](https://github.com/yasmramos/MindForge/releases) and add it to your project:
+
+**Maven (local JAR):**
+```bash
+mvn install:install-file -Dfile=mindforge-1.1.0-alpha.jar \
+  -DgroupId=com.mindforge -DartifactId=mindforge \
+  -Dversion=1.1.0-alpha -Dpackaging=jar
+```
+
+Then add to your `pom.xml`:
+```xml
+<dependency>
+    <groupId>com.mindforge</groupId>
+    <artifactId>mindforge</artifactId>
+    <version>1.1.0-alpha</version>
+</dependency>
+```
+
+### Option 2: Build from Source
 
 ```bash
 git clone https://github.com/yasmramos/MindForge.git
 cd MindForge
 mvn clean install
 ```
+
+The JAR will be generated at `target/mindforge-1.1.0-alpha.jar`.
 
 ## 💡 Usage Examples
 
@@ -844,7 +925,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.0.8-alpha
+- **Version**: 1.1.0-alpha
 - **Java Version**: 17
 
 ## 📚 Main Dependencies
@@ -857,22 +938,29 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
 
-### Development Setup
+- Code of Conduct
+- Development Setup
+- Code Style Guidelines
+- Testing Requirements
+- Pull Request Process
+
+### Quick Start for Contributors
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+3. Write tests and ensure all tests pass (`mvn test`)
+4. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+5. Push to the branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request
 
 ### Coding Standards
 
 - Follow Java naming conventions
-- Add unit tests for new features
-- Maintain code coverage above 80%
+- Add unit tests for new features (minimum 80% coverage)
 - Document public APIs with Javadoc
+- Run `mvn verify` before submitting PRs
 
 ## 📝 License
 
@@ -890,4 +978,6 @@ For questions, suggestions, or feedback, please open an issue on GitHub.
 ---
 
 **Author**: MindForge Team  
-**Repository**: [https://github.com/yasmramos/MindForge](https://github.com/yasmramos/MindForge)
+**Repository**: [https://github.com/yasmramos/MindForge](https://github.com/yasmramos/MindForge)  
+**Examples**: [View all examples](examples/README.md)  
+**Contributing**: [Contribution guidelines](CONTRIBUTING.md)
