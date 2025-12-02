@@ -23,8 +23,6 @@
             <groupId>com.mindforge</groupId>
             <artifactId>mindforge</artifactId>
             <version>1.1.0-alpha</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../target/mindforge-1.1.0-alpha.jar</systemPath>
         </dependency>
     </dependencies>
 

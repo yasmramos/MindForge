@@ -36,14 +36,16 @@ public class ClusteringExample {
         
         for (int k = 2; k <= 5; k++) {
             KMeans kmeans = new KMeans(k, 100, new Random(42));
-            int[] labels = kmeans.fitPredict(X);
-            double inertia = kmeans.getInertia();
+            int[] labels = kmeans.cluster(X);
             
             // Count samples per cluster
             int[] counts = new int[k];
             for (int label : labels) {
                 counts[label]++;
             }
+            
+            // Calculate inertia (sum of squared distances to centroids)
+            double inertia = calculateInertia(X, labels, kmeans.getCentroids());
             
             StringBuilder clusterInfo = new StringBuilder("[");
             for (int i = 0; i < k; i++) {
@@ -61,7 +63,7 @@ public class ClusteringExample {
         System.out.println("   " + "-".repeat(50));
         
         KMeans kmeans3 = new KMeans(3, 100, new Random(42));
-        int[] labels = kmeans3.fitPredict(X);
+        int[] labels = kmeans3.cluster(X);
         double[][] centroids = kmeans3.getCentroids();
         
         System.out.println("   Cluster centroids (scaled coordinates):");
@@ -87,7 +89,7 @@ public class ClusteringExample {
         double[][] custScaled = custScaler.transform(customers);
         
         KMeans custKmeans = new KMeans(3, 100, new Random(42));
-        int[] custLabels = custKmeans.fitPredict(custScaled);
+        int[] custLabels = custKmeans.cluster(custScaled);
         
         String[] segmentNames = {"Budget Conscious", "Average Spenders", "Premium Customers"};
         
@@ -108,6 +110,21 @@ public class ClusteringExample {
         System.out.println("- Lower inertia = tighter clusters");
         System.out.println("- Use 'elbow method' to find optimal k");
         System.out.println("- Common use cases: customer segmentation, image compression");
+    }
+
+    /**
+     * Calculate inertia (sum of squared distances to centroids)
+     */
+    private static double calculateInertia(double[][] X, int[] labels, double[][] centroids) {
+        double inertia = 0;
+        for (int i = 0; i < X.length; i++) {
+            double[] centroid = centroids[labels[i]];
+            for (int j = 0; j < X[i].length; j++) {
+                double diff = X[i][j] - centroid[j];
+                inertia += diff * diff;
+            }
+        }
+        return inertia;
     }
 
     private static double[][] generateClusteredData(int n, int nClusters) {
