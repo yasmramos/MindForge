@@ -3,7 +3,7 @@
 A Machine Learning and Artificial Intelligence library for Java, inspired by libraries like Smile, designed to be easy to use and efficient.
 
 [![Build Status](https://github.com/yasmramos/MindForge/actions/workflows/ci.yml/badge.svg)](https://github.com/yasmramos/MindForge/actions/workflows/ci.yml)
-[![Java Version](https://img.shields.io/badge/Java-17%2B-blue)](https://www.oracle.com/java/)
+[![Java Version](https://img.shields.io/badge/Java-11%2B-blue)](https://www.oracle.com/java/)
 [![Maven](https://img.shields.io/badge/Maven-3.6%2B-red)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-TBD-yellow)](LICENSE)
 
@@ -118,7 +118,7 @@ MindForge/
 
 ## 🔧 Requirements
 
-- **Java 17** or higher
+- **Java 11** or higher
 - **Maven 3.6** or higher
 
 ## 📥 Installation
@@ -926,7 +926,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
 - **Version**: 1.1.0-alpha
-- **Java Version**: 17
+- **Java Version**: 11
 
 ## 📚 Main Dependencies
 
