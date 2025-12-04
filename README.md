@@ -61,21 +61,30 @@ public class QuickStart {
 - **Classification**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, Naive Bayes (Gaussian, Multinomial, Bernoulli), Support Vector Machines (SVM), Gradient Boosting
 - **Regression**: Linear Regression, Ridge Regression (L2 regularization)
 - **Clustering**: K-Means with multiple initialization strategies
+- **Neural Networks**: Multi-Layer Perceptron (MLP) with backpropagation, multiple activation functions (Sigmoid, ReLU, Tanh, Softmax, Leaky ReLU, ELU), Dropout and Batch Normalization layers
 
 ### Data Processing
 - **Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
 - **Feature Selection**: VarianceThreshold, SelectKBest (F-test, Chi2, Mutual Info), RFE (Recursive Feature Elimination)
 - **Dimensionality Reduction**: PCA (Principal Component Analysis)
 - **Pipelines**: Chain transformers and estimators for streamlined workflows
+- **Dataset Management**: Built-in datasets (Iris, Wine, Breast Cancer, Boston Housing), train/test splitting
 
 ### Model Management
 - **Persistence**: Save/Load models to disk or byte arrays
 - **Validation**: Cross-Validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split), Train-Test Split
-- **Metrics**: Accuracy, Precision, Recall, F1-Score, Confusion Matrix, MSE, RMSE, MAE, R²
+- **Metrics**: Accuracy, Precision, Recall, F1-Score, Confusion Matrix, ROC Curve, AUC, MSE, RMSE, MAE, R²
 - **Distance Functions**: Euclidean, Manhattan, Chebyshev, Minkowski
 
+### Utilities
+- **Logging**: Comprehensive logging system with multiple levels (DEBUG, INFO, WARN, ERROR, FATAL)
+- **Configuration**: YAML and Properties file support for application settings
+- **Array Utils**: Matrix operations, statistics, normalization, one-hot encoding
+- **Visualization**: Chart generation (line, scatter, bar, heatmap) to PNG files
+- **API Server**: REST API for model serving and predictions
+
 ### Developer Experience
-- **6 Comprehensive Examples**: QuickStart, Clustering, Regression, Preprocessing, Pipelines, Validation
+- **8 Comprehensive Examples**: QuickStart, Clustering, Regression, Preprocessing, Pipelines, Validation, Neural Networks, Visualization
 - **Simple and Consistent API**: Intuitive interfaces across all algorithms
 - **CI/CD Integration**: Automated testing with GitHub Actions
 
@@ -111,8 +120,11 @@ MindForge/
 │   │   └── Distance.java
 │   ├── validation/        # Evaluation metrics
 │   │   └── Metrics.java
-│   ├── neural/            # Neural networks (coming soon)
-│   └── util/              # Utilities (coming soon)
+│   ├── neural/            # Neural networks (MLP, layers, activations)
+│   ├── data/              # Dataset management and loaders
+│   ├── visualization/     # Chart generation
+│   ├── api/               # REST API server and client
+│   └── util/              # Logging, configuration, array utilities
 └── pom.xml
 ```
 
@@ -129,9 +141,9 @@ Download the latest release from [GitHub Releases](https://github.com/yasmramos/
 
 **Maven (local JAR):**
 ```bash
-mvn install:install-file -Dfile=mindforge-1.1.0-alpha.jar \
+mvn install:install-file -Dfile=mindforge-1.2.0-alpha.jar \
   -DgroupId=com.mindforge -DartifactId=mindforge \
-  -Dversion=1.1.0-alpha -Dpackaging=jar
+  -Dversion=1.2.0-alpha -Dpackaging=jar
 ```
 
 Then add to your `pom.xml`:
@@ -139,7 +151,7 @@ Then add to your `pom.xml`:
 <dependency>
     <groupId>com.mindforge</groupId>
     <artifactId>mindforge</artifactId>
-    <version>1.1.0-alpha</version>
+    <version>1.2.0-alpha</version>
 </dependency>
 ```
 
@@ -151,7 +163,7 @@ cd MindForge
 mvn clean install
 ```
 
-The JAR will be generated at `target/mindforge-1.1.0-alpha.jar`.
+The JAR will be generated at `target/mindforge-1.2.0-alpha.jar`.
 
 ## 💡 Usage Examples
 
@@ -683,6 +695,245 @@ byte[] bytes = ModelPersistence.toBytes(model);
 GaussianNaiveBayes fromBytes = ModelPersistence.fromBytes(bytes);
 ```
 
+### Neural Networks (MLP)
+
+```java
+import com.mindforge.neural.*;
+
+// Create a neural network for XOR problem
+NeuralNetwork network = new NeuralNetwork();
+network.addLayer(new DenseLayer(2, 8, "relu"));     // Input: 2 features, 8 neurons
+network.addLayer(new DropoutLayer(0.2));             // 20% dropout for regularization
+network.addLayer(new DenseLayer(8, 4, "relu"));     // Hidden layer
+network.addLayer(new DenseLayer(4, 1, "sigmoid")); // Output: 1 neuron for binary classification
+
+// Training data (XOR)
+double[][] X = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
+double[][] y = {{0}, {1}, {1}, {0}};
+
+// Train the network
+network.fit(X, y, 1000, 4); // 1000 epochs, batch size 4
+
+// Make predictions
+double[] prediction = network.predict(new double[]{0, 1});
+System.out.println("Prediction for [0,1]: " + prediction[0]);
+
+// === Activation Functions ===
+double[] input = {-1.0, 0.0, 1.0};
+double[] sigmoidOut = ActivationFunction.sigmoid(input);
+double[] reluOut = ActivationFunction.relu(input);
+double[] tanhOut = ActivationFunction.tanh(input);
+double[] softmaxOut = ActivationFunction.softmax(input);
+```
+
+### Dataset Loaders
+
+```java
+import com.mindforge.data.*;
+
+// Load built-in datasets
+Dataset iris = DatasetLoader.loadIris();           // 150 samples, 4 features, 3 classes
+Dataset wine = DatasetLoader.loadWine();           // 178 samples, 13 features, 3 classes
+Dataset cancer = DatasetLoader.loadBreastCancer(); // 569 samples, 30 features, 2 classes
+Dataset boston = DatasetLoader.loadBostonHousing(); // 506 samples, 13 features (regression)
+
+// Dataset information
+System.out.println("Samples: " + iris.getNumSamples());
+System.out.println("Features: " + iris.getNumFeatures());
+System.out.println("Feature names: " + Arrays.toString(iris.getFeatureNames()));
+
+// Train-test split
+Dataset[] splits = iris.trainTestSplit(0.3, true, 42L); // 30% test, shuffle, seed 42
+Dataset train = splits[0];
+Dataset test = splits[1];
+
+// Access data
+double[][] X_train = train.getFeatures();
+double[] y_train = train.getTargets();
+
+// Get specific samples
+double[] sample = iris.getSample(0);
+double target = iris.getTarget(0);
+
+// Shuffle dataset
+Dataset shuffled = iris.shuffle(42L);
+```
+
+### Confusion Matrix and ROC Curve
+
+```java
+import com.mindforge.validation.*;
+
+// === Confusion Matrix ===
+int[] yTrue = {0, 0, 1, 1, 2, 2, 0, 1, 2};
+int[] yPred = {0, 0, 1, 2, 2, 1, 0, 1, 2};
+
+ConfusionMatrix cm = new ConfusionMatrix(yTrue, yPred, 3);
+
+// Overall metrics
+System.out.println("Accuracy: " + cm.getAccuracy());
+System.out.println("Macro Precision: " + cm.getMacroPrecision());
+System.out.println("Macro Recall: " + cm.getMacroRecall());
+System.out.println("Macro F1: " + cm.getMacroF1());
+
+// Per-class metrics
+double[] precision = cm.getPrecisionPerClass();
+double[] recall = cm.getRecallPerClass();
+double[] f1 = cm.getF1ScorePerClass();
+
+// Get the confusion matrix
+int[][] matrix = cm.getMatrix();
+
+// Print classification report
+System.out.println(cm.getReport());
+
+// === ROC Curve and AUC ===
+double[] yTrueBinary = {0, 0, 0, 1, 1, 1};
+double[] yScores = {0.1, 0.2, 0.4, 0.6, 0.8, 0.9}; // Prediction probabilities
+
+double auc = ROCCurve.calculateAUC(yTrueBinary, yScores);
+System.out.println("AUC: " + auc);
+
+ROCCurve roc = new ROCCurve(yTrueBinary, yScores);
+double[] tpr = roc.getTPR();        // True Positive Rates
+double[] fpr = roc.getFPR();        // False Positive Rates
+double[] thresholds = roc.getThresholds();
+double optimalThreshold = roc.getOptimalThreshold();
+```
+
+### Visualization
+
+```java
+import com.mindforge.visualization.ChartGenerator;
+
+// Line chart
+double[] x = {1, 2, 3, 4, 5};
+double[] y = {2, 4, 6, 8, 10};
+ChartGenerator.saveLineChart("line_chart.png", x, y, "Training Loss");
+
+// Scatter plot
+double[] xData = {1, 2, 3, 4, 5, 6, 7, 8};
+double[] yData = {2, 4, 3, 5, 7, 6, 8, 9};
+ChartGenerator.saveScatterChart("scatter.png", xData, yData, "Data Distribution");
+
+// Bar chart
+String[] categories = {"Class A", "Class B", "Class C"};
+double[] values = {30, 45, 25};
+ChartGenerator.saveBarChart("bar_chart.png", categories, values, "Class Distribution");
+
+// Heatmap (e.g., confusion matrix)
+double[][] heatmapData = {{10, 2, 1}, {3, 15, 2}, {1, 3, 12}};
+ChartGenerator.saveHeatmap("heatmap.png", heatmapData, "Confusion Matrix");
+```
+
+### Logging and Configuration
+
+```java
+import com.mindforge.util.*;
+
+// === Logging ===
+MindForgeLogger.setLevel(MindForgeLogger.Level.DEBUG);
+MindForgeLogger.setLogFile("mindforge.log");
+
+MindForgeLogger.debug("Debug message");
+MindForgeLogger.info("Training started with %d samples", 1000);
+MindForgeLogger.warn("Learning rate might be too high");
+MindForgeLogger.error("Failed to load model");
+
+// === Configuration ===
+// Load from properties file
+Configuration config = new Configuration("config.properties");
+String modelPath = config.getString("model.path", "/default/path");
+double learningRate = config.getDouble("learning.rate", 0.01);
+int epochs = config.getInt("epochs", 100);
+boolean verbose = config.getBoolean("verbose", false);
+
+// Load from YAML
+Configuration yamlConfig = new Configuration("config.yml");
+String dbHost = yamlConfig.getString("database.host", "localhost");
+
+// Programmatic configuration
+Configuration appConfig = new Configuration();
+appConfig.set("model.name", "MyModel");
+appConfig.set("batch.size", 32);
+appConfig.save("app_config.properties");
+```
+
+### Array Utilities
+
+```java
+import com.mindforge.util.ArrayUtils;
+
+// Matrix operations
+double[][] matrix = {{1, 2, 3}, {4, 5, 6}};
+double[][] transposed = ArrayUtils.transpose(matrix);
+
+double[] a = {1, 2, 3};
+double[] b = {4, 5, 6};
+double dot = ArrayUtils.dot(a, b);  // 32.0
+
+// Statistics
+double mean = ArrayUtils.mean(a);
+double sum = ArrayUtils.sum(a);
+double std = ArrayUtils.std(a);
+double min = ArrayUtils.min(a);
+double max = ArrayUtils.max(a);
+int argmax = ArrayUtils.argmax(a);
+
+// Normalization
+double[] normalized = ArrayUtils.normalize(a);      // Scale to [0, 1]
+double[] standardized = ArrayUtils.standardize(a);  // Z-score normalization
+
+// Array creation
+double[] zeros = ArrayUtils.zeros(10);
+double[] ones = ArrayUtils.ones(10);
+double[] range = ArrayUtils.range(0, 10, 1);
+double[] linspace = ArrayUtils.linspace(0, 1, 11);
+
+// One-hot encoding
+int[] labels = {0, 1, 2, 1, 0};
+double[][] oneHot = ArrayUtils.oneHotEncode(labels, 3);
+
+// Element-wise operations
+double[] added = ArrayUtils.add(a, b);
+double[] scaled = ArrayUtils.scale(a, 2.0);
+```
+
+### REST API Server
+
+```java
+import com.mindforge.api.*;
+import com.mindforge.classification.KNearestNeighbors;
+
+// Create and train a model
+KNearestNeighbors knn = new KNearestNeighbors(3);
+double[][] X_train = {{1, 2}, {2, 3}, {8, 8}, {9, 10}};
+int[] y_train = {0, 0, 1, 1};
+knn.train(X_train, y_train);
+
+// Create model server
+ModelServer server = new ModelServer(8080);
+
+// Register model as a prediction endpoint
+server.registerModel("/predict/knn", features -> {
+    int prediction = knn.predict(features);
+    return new double[]{prediction};
+});
+
+// Start server
+server.start();
+System.out.println("Model server running on http://localhost:8080");
+
+// === Client usage ===
+ModelClient client = new ModelClient("http://localhost:8080");
+double[] features = {5.0, 5.0};
+double[] prediction = client.predict("/predict/knn", features);
+System.out.println("Prediction: " + prediction[0]);
+
+// Stop server when done
+server.stop();
+```
+
 ## 🧪 Running Tests
 
 ```bash
@@ -896,27 +1147,30 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 ## 🛣️ Roadmap
 
-### Short Term
+### Completed
 - [x] Decision Trees
 - [x] Logistic Regression
-- [ ] Naive Bayes
+- [x] Naive Bayes (Gaussian, Multinomial, Bernoulli)
 - [x] Data preprocessing utilities (MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder)
 - [x] Train/Test split functionality (with stratified split support)
-
-### Medium Term
 - [x] Random Forest
-- [x] Logistic Regression
 - [x] Cross-validation (K-Fold, Stratified K-Fold, LOOCV, Shuffle Split)
-- [x] Naive Bayes (Gaussian, Multinomial, Bernoulli)
 - [x] Support Vector Machines (Linear SVM)
 - [x] Gradient Boosting
 - [x] Feature Selection (VarianceThreshold, SelectKBest, RFE)
 - [x] PCA (Principal Component Analysis)
 - [x] Model Persistence (Save/Load)
+- [x] Neural Networks (MLP with backpropagation)
+- [x] Advanced Metrics (Confusion Matrix, ROC Curve, AUC)
+- [x] Dataset Loaders (Iris, Wine, Breast Cancer, Boston Housing)
+- [x] Logging System
+- [x] Configuration Management (YAML, Properties)
+- [x] Array Utilities
+- [x] Visualization (Chart generation)
+- [x] REST API Server for model serving
 
-### Long Term
-- [ ] Neural Networks (MLP)
-- [ ] Deep Learning support
+### In Progress
+- [ ] Deep Learning support (CNN, RNN)
 - [ ] Advanced ensemble methods (AdaBoost, XGBoost)
 - [ ] SVM Kernels (RBF, Polynomial)
 - [ ] GPU acceleration
@@ -925,7 +1179,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 - **Group ID**: com.mindforge
 - **Artifact ID**: mindforge
-- **Version**: 1.1.0-alpha
+- **Version**: 1.2.0-alpha
 - **Java Version**: 11
 
 ## 📚 Main Dependencies
