@@ -667,7 +667,7 @@ public class LinearDiscriminantAnalysis implements Classifier<double[]>, Probabi
     }
     
     @Override
-    public double[] predictProbabilities(double[] x) {
+    public double[] predictProba(double[] x) {
         if (!fitted) {
             throw new IllegalStateException("Model must be fitted before prediction");
         }
@@ -848,6 +848,17 @@ public class LinearDiscriminantAnalysis implements Classifier<double[]>, Probabi
      * @return true if fitted
      */
     public boolean isFitted() {
+        return fitted;
+    }
+    
+    /**
+     * Checks if the classifier has been trained.
+     * Implementation of ProbabilisticClassifier interface.
+     * 
+     * @return true if trained, false otherwise
+     */
+    @Override
+    public boolean isTrained() {
         return fitted;
     }
     

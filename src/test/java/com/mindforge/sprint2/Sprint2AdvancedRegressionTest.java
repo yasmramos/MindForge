@@ -408,7 +408,7 @@ public class Sprint2AdvancedRegressionTest {
             
             lda.train(classificationX, classificationY);
             
-            double[] probs = lda.predictProbabilities(classificationX[0]);
+            double[] probs = lda.predictProba(classificationX[0]);
             
             assertEquals(3, probs.length);
             

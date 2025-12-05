@@ -38,7 +38,7 @@ import java.util.Random;
  * @author MindForge Team
  * @version 1.2.0-alpha
  */
-public class LogisticRegression implements Classifier<double[]>, ProbabilisticClassifier {
+public class LogisticRegression implements Classifier<double[]>, ProbabilisticClassifier<double[]> {
     
     /**
      * Regularization type for the logistic regression.
@@ -1000,6 +1000,17 @@ public class LogisticRegression implements Classifier<double[]>, ProbabilisticCl
      * @return true if model is fitted
      */
     public boolean isFitted() {
+        return fitted;
+    }
+    
+    /**
+     * Checks if the classifier has been trained.
+     * Implementation of ProbabilisticClassifier interface.
+     * 
+     * @return true if trained, false otherwise
+     */
+    @Override
+    public boolean isTrained() {
         return fitted;
     }
     
