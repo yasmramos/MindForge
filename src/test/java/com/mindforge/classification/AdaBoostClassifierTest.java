@@ -241,19 +241,38 @@ class AdaBoostClassifierTest {
             double[][] X = {{0}, {1}, {2}};
             int[] y = {1, 1, 1};
             
-            // Should throw because we need 2 classes
-            assertThrows(IllegalArgumentException.class, () -> ada.fit(X, y));
+            // Single class data - AdaBoost should handle this gracefully
+            ada.fit(X, y);
+            assertTrue(ada.isFitted());
         }
         
         @Test
-        @DisplayName("Three or more classes throws exception")
+        @DisplayName("Multiclass classification works")
         void testMulticlass() {
-            AdaBoostClassifier ada = new AdaBoostClassifier(10);
+            AdaBoostClassifier ada = new AdaBoostClassifier.Builder()
+                .nEstimators(50)
+                .learningRate(1.0)
+                .randomState(42)
+                .build();
             
-            double[][] X = {{0}, {1}, {2}};
-            int[] y = {0, 1, 2};
+            // 3-class problem
+            double[][] X = {
+                {0, 0}, {0.5, 0.5}, {1, 0},  // Class 0
+                {5, 5}, {5.5, 5.5}, {6, 5},  // Class 1
+                {10, 0}, {10.5, 0.5}, {11, 0} // Class 2
+            };
+            int[] y = {0, 0, 0, 1, 1, 1, 2, 2, 2};
             
-            assertThrows(IllegalArgumentException.class, () -> ada.fit(X, y));
+            ada.fit(X, y);
+            assertTrue(ada.isFitted());
+            assertEquals(3, ada.getNumClasses());
+            
+            int[] predictions = ada.predict(X);
+            assertEquals(9, predictions.length);
+            
+            // Check classes
+            int[] classes = ada.getClasses();
+            assertArrayEquals(new int[]{0, 1, 2}, classes);
         }
         
         @Test
@@ -520,6 +539,197 @@ class AdaBoostClassifierTest {
             double accuracy = (double) correct / n;
             
             assertTrue(accuracy > 0.7, "Should achieve reasonable accuracy on structured data");
+        }
+    }
+    
+    @Nested
+    @DisplayName("Builder Tests")
+    class BuilderTests {
+        
+        @Test
+        @DisplayName("Builder with defaults")
+        void testBuilderDefaults() {
+            AdaBoostClassifier ada = new AdaBoostClassifier.Builder().build();
+            assertEquals(50, ada.getNEstimators());
+            assertEquals(1.0, ada.getLearningRate(), 1e-10);
+            assertEquals("SAMME", ada.getAlgorithm());
+        }
+        
+        @Test
+        @DisplayName("Builder with custom values")
+        void testBuilderCustom() {
+            AdaBoostClassifier ada = new AdaBoostClassifier.Builder()
+                .nEstimators(100)
+                .learningRate(0.5)
+                .algorithm("SAMME")
+                .randomState(123)
+                .build();
+            
+            assertEquals(100, ada.getNEstimators());
+            assertEquals(0.5, ada.getLearningRate(), 1e-10);
+        }
+        
+        @Test
+        @DisplayName("Builder invalid nEstimators throws")
+        void testBuilderInvalidEstimators() {
+            assertThrows(IllegalArgumentException.class, () -> 
+                new AdaBoostClassifier.Builder().nEstimators(0).build());
+        }
+        
+        @Test
+        @DisplayName("Builder invalid learningRate throws")
+        void testBuilderInvalidLearningRate() {
+            assertThrows(IllegalArgumentException.class, () -> 
+                new AdaBoostClassifier.Builder().learningRate(-0.1).build());
+        }
+        
+        @Test
+        @DisplayName("Builder invalid algorithm throws")
+        void testBuilderInvalidAlgorithm() {
+            assertThrows(IllegalArgumentException.class, () -> 
+                new AdaBoostClassifier.Builder().algorithm("INVALID").build());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Multiclass Classification Tests")
+    class MulticlassTests {
+        
+        @Test
+        @DisplayName("Four class classification")
+        void testFourClasses() {
+            AdaBoostClassifier ada = new AdaBoostClassifier.Builder()
+                .nEstimators(100)
+                .learningRate(1.0)
+                .randomState(42)
+                .build();
+            
+            double[][] X = {
+                {0, 0}, {0.1, 0.1},      // Class 0
+                {5, 0}, {5.1, 0.1},      // Class 1
+                {0, 5}, {0.1, 5.1},      // Class 2
+                {5, 5}, {5.1, 5.1}       // Class 3
+            };
+            int[] y = {0, 0, 1, 1, 2, 2, 3, 3};
+            
+            ada.fit(X, y);
+            assertEquals(4, ada.getNumClasses());
+            
+            double[][] proba = ada.predictProba(X);
+            assertEquals(8, proba.length);
+            assertEquals(4, proba[0].length);
+            
+            // Probabilities should sum to 1
+            for (double[] p : proba) {
+                double sum = 0;
+                for (double v : p) sum += v;
+                assertEquals(1.0, sum, 1e-6);
+            }
+        }
+        
+        @Test
+        @DisplayName("Multiclass predict single sample")
+        void testMulticlassSinglePredict() {
+            AdaBoostClassifier ada = new AdaBoostClassifier.Builder()
+                .nEstimators(50)
+                .randomState(42)
+                .build();
+            
+            double[][] X = {
+                {0, 0}, {1, 1},    // Class 0
+                {10, 0}, {11, 1},  // Class 1
+                {0, 10}, {1, 11}   // Class 2
+            };
+            int[] y = {0, 0, 1, 1, 2, 2};
+            
+            ada.fit(X, y);
+            
+            // Test single prediction
+            int pred = ada.predict(new double[]{0.5, 0.5});
+            assertTrue(pred >= 0 && pred <= 2);
+            
+            // Test decision function
+            double[] scores = ada.decisionFunction(new double[]{0.5, 0.5});
+            assertEquals(3, scores.length);
+        }
+        
+        @Test
+        @DisplayName("Multiclass score method")
+        void testMulticlassScore() {
+            AdaBoostClassifier ada = new AdaBoostClassifier.Builder()
+                .nEstimators(50)
+                .randomState(42)
+                .build();
+            
+            double[][] X = {
+                {0, 0}, {1, 1}, {2, 0},    // Class 0
+                {10, 0}, {11, 1}, {12, 0}, // Class 1
+                {0, 10}, {1, 11}, {2, 10}  // Class 2
+            };
+            int[] y = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+            
+            ada.fit(X, y);
+            
+            double accuracy = ada.score(X, y);
+            assertTrue(accuracy >= 0 && accuracy <= 1);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Additional Method Tests")
+    class AdditionalMethodTests {
+        
+        @Test
+        @DisplayName("getNumEstimators alias works")
+        void testGetNumEstimators() {
+            AdaBoostClassifier ada = new AdaBoostClassifier(20);
+            double[][] X = {{0}, {1}, {10}, {11}};
+            int[] y = {0, 0, 1, 1};
+            ada.fit(X, y);
+            
+            assertEquals(ada.getActualNEstimators(), ada.getNumEstimators());
+        }
+        
+        @Test
+        @DisplayName("isTrained alias works")
+        void testIsTrained() {
+            AdaBoostClassifier ada = new AdaBoostClassifier();
+            assertFalse(ada.isTrained());
+            
+            ada.fit(new double[][]{{0}, {1}}, new int[]{0, 1});
+            assertTrue(ada.isTrained());
+            assertEquals(ada.isFitted(), ada.isTrained());
+        }
+        
+        @Test
+        @DisplayName("getEstimatorErrors works")
+        void testGetEstimatorErrors() {
+            AdaBoostClassifier ada = new AdaBoostClassifier.Builder()
+                .nEstimators(10)
+                .randomState(42)
+                .build();
+            
+            double[][] X = {{0}, {1}, {10}, {11}};
+            int[] y = {0, 0, 1, 1};
+            ada.fit(X, y);
+            
+            double[] errors = ada.getEstimatorErrors();
+            assertTrue(errors.length > 0);
+            
+            for (double e : errors) {
+                assertTrue(e >= 0 && e <= 1, "Errors should be between 0 and 1");
+            }
+        }
+        
+        @Test
+        @DisplayName("train method works like fit")
+        void testTrainMethod() {
+            AdaBoostClassifier ada = new AdaBoostClassifier(10);
+            double[][] X = {{0}, {1}, {10}, {11}};
+            int[] y = {0, 0, 1, 1};
+            
+            ada.train(X, y);
+            assertTrue(ada.isFitted());
         }
     }
 }
