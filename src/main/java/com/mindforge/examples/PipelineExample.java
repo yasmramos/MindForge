@@ -1,12 +1,10 @@
 package com.mindforge.examples;
 
-import com.mindforge.pipeline.*;
 import com.mindforge.preprocessing.*;
-import com.mindforge.classification.LogisticRegression;
-import com.mindforge.regression.LinearRegression;
+import com.mindforge.classification.KNearestNeighbors;
+import com.mindforge.classification.DecisionTreeClassifier;
 import com.mindforge.data.Dataset;
 import com.mindforge.data.DatasetLoader;
-import com.mindforge.validation.Metrics;
 
 /**
  * Demonstrates ML Pipeline functionality in MindForge.
@@ -52,21 +50,21 @@ public class PipelineExample {
             testY[i - trainSize] = y[i];
         }
         
-        // Create pipeline
-        Pipeline pipeline = new Pipeline();
-        pipeline.addStep("scaler", new StandardScaler());
-        pipeline.addStep("classifier", new LogisticRegression(0.1, 1000));
-        
+        // Manual pipeline: StandardScaler -> KNN
         System.out.println("   Pipeline steps:");
         System.out.println("     1. StandardScaler - normalize features");
-        System.out.println("     2. LogisticRegression - classification");
+        System.out.println("     2. KNearestNeighbors - classification");
         
-        // Fit pipeline
-        System.out.println("\n   Training pipeline...");
-        pipeline.fit(trainX, trainY);
+        StandardScaler scaler = new StandardScaler();
+        scaler.fit(trainX);
+        double[][] scaledTrainX = scaler.transform(trainX);
+        double[][] scaledTestX = scaler.transform(testX);
+        
+        KNearestNeighbors knn = new KNearestNeighbors(5);
+        knn.train(scaledTrainX, trainY);
         
         // Predict
-        int[] predictions = pipeline.predict(testX);
+        int[] predictions = knn.predict(scaledTestX);
         
         // Calculate accuracy
         int correct = 0;
@@ -75,26 +73,40 @@ public class PipelineExample {
         }
         double accuracy = (double) correct / testY.length;
         
+        System.out.println("\n   Training pipeline...");
         System.out.println("   Test Accuracy: " + String.format("%.4f", accuracy));
         
         // 2. Pipeline with Multiple Preprocessing Steps
         System.out.println("\n2. Multi-Step Preprocessing Pipeline:");
         System.out.println("-".repeat(40));
         
-        Pipeline multiPipeline = new Pipeline();
-        multiPipeline.addStep("minmax", new MinMaxScaler());
-        multiPipeline.addStep("poly", new PolynomialFeatures(2, false, true));
-        multiPipeline.addStep("standard", new StandardScaler());
-        multiPipeline.addStep("classifier", new LogisticRegression(0.01, 500));
+        // MinMaxScaler -> PolynomialFeatures -> StandardScaler -> KNN
+        MinMaxScaler minmax = new MinMaxScaler();
+        minmax.fit(trainX);
+        double[][] mmScaled = minmax.transform(trainX);
+        
+        PolynomialFeatures poly = new PolynomialFeatures(2, false, true);
+        poly.fit(mmScaled);
+        double[][] polyFeatures = poly.transform(mmScaled);
+        
+        StandardScaler stdScaler = new StandardScaler();
+        stdScaler.fit(polyFeatures);
+        double[][] finalTrainX = stdScaler.transform(polyFeatures);
+        
+        // Transform test data through same pipeline
+        double[][] mmTestScaled = minmax.transform(testX);
+        double[][] polyTestFeatures = poly.transform(mmTestScaled);
+        double[][] finalTestX = stdScaler.transform(polyTestFeatures);
         
         System.out.println("   Pipeline steps:");
         System.out.println("     1. MinMaxScaler - scale to [0,1]");
         System.out.println("     2. PolynomialFeatures - add interactions");
         System.out.println("     3. StandardScaler - standardize");
-        System.out.println("     4. LogisticRegression - classify");
+        System.out.println("     4. KNearestNeighbors - classify");
         
-        multiPipeline.fit(trainX, trainY);
-        int[] multiPredictions = multiPipeline.predict(testX);
+        KNearestNeighbors multiKnn = new KNearestNeighbors(5);
+        multiKnn.train(finalTrainX, trainY);
+        int[] multiPredictions = multiKnn.predict(finalTestX);
         
         correct = 0;
         for (int i = 0; i < testY.length; i++) {
@@ -104,8 +116,8 @@ public class PipelineExample {
         
         System.out.println("\n   Test Accuracy: " + String.format("%.4f", accuracy));
         
-        // 3. ColumnTransformer for Mixed Features
-        System.out.println("\n3. ColumnTransformer for Mixed Features:");
+        // 3. Different Scalers for Different Columns
+        System.out.println("\n3. Column-wise Preprocessing:");
         System.out.println("-".repeat(40));
         
         // Simulate mixed data: numeric + categorical-like columns
@@ -115,25 +127,35 @@ public class PipelineExample {
         int[] numericCols = {0, 1};
         int[] categoricalCols = {2, 3};
         
-        ColumnTransformer colTransformer = new ColumnTransformer();
-        colTransformer.addTransformer("numeric_scaler", new StandardScaler(), numericCols);
-        colTransformer.addTransformer("other_scaler", new MinMaxScaler(), categoricalCols);
+        // Extract and scale numeric columns
+        double[][] numericTrain = extractColumns(trainX, numericCols);
+        double[][] numericTest = extractColumns(testX, numericCols);
+        StandardScaler numericScaler = new StandardScaler();
+        numericScaler.fit(numericTrain);
+        double[][] scaledNumericTrain = numericScaler.transform(numericTrain);
+        double[][] scaledNumericTest = numericScaler.transform(numericTest);
+        
+        // Extract and scale categorical columns
+        double[][] catTrain = extractColumns(trainX, categoricalCols);
+        double[][] catTest = extractColumns(testX, categoricalCols);
+        MinMaxScaler catScaler = new MinMaxScaler();
+        catScaler.fit(catTrain);
+        double[][] scaledCatTrain = catScaler.transform(catTrain);
+        double[][] scaledCatTest = catScaler.transform(catTest);
+        
+        // Concatenate
+        double[][] transformedTrain = concatenate(scaledNumericTrain, scaledCatTrain);
+        double[][] transformedTest = concatenate(scaledNumericTest, scaledCatTest);
         
         System.out.println("   Configuration:");
         System.out.println("     Columns [0,1] -> StandardScaler");
         System.out.println("     Columns [2,3] -> MinMaxScaler");
-        
-        // Fit and transform
-        colTransformer.fit(trainX);
-        double[][] transformedTrain = colTransformer.transform(trainX);
-        double[][] transformedTest = colTransformer.transform(testX);
-        
         System.out.println("\n   Original shape: " + trainX.length + " x " + trainX[0].length);
         System.out.println("   Transformed shape: " + transformedTrain.length + " x " + transformedTrain[0].length);
         
         // Use with classifier
-        LogisticRegression clf = new LogisticRegression(0.1, 1000);
-        clf.fit(transformedTrain, trainY);
+        DecisionTreeClassifier clf = new DecisionTreeClassifier();
+        clf.train(transformedTrain, trainY);
         int[] colPredictions = clf.predict(transformedTest);
         
         correct = 0;
@@ -148,51 +170,44 @@ public class PipelineExample {
         System.out.println("\n4. GridSearchCV - Hyperparameter Tuning:");
         System.out.println("-".repeat(40));
         
-        System.out.println("   Searching best parameters for LogisticRegression...");
+        System.out.println("   Searching best parameters for KNN...");
         
         // Define parameter grid
-        double[] learningRates = {0.001, 0.01, 0.1};
-        int[] iterations = {100, 500, 1000};
+        int[] kValues = {1, 3, 5, 7, 9};
         
         System.out.println("   Parameter Grid:");
-        System.out.println("     learning_rate: [0.001, 0.01, 0.1]");
-        System.out.println("     max_iterations: [100, 500, 1000]");
-        System.out.println("     Total combinations: " + (learningRates.length * iterations.length));
+        System.out.println("     k: [1, 3, 5, 7, 9]");
+        System.out.println("     Total combinations: " + kValues.length);
         
-        // Manual grid search (simulated)
+        // Manual grid search
         double bestAccuracy = 0;
-        double bestLR = 0;
-        int bestIter = 0;
+        int bestK = 0;
         
         StandardScaler searchScaler = new StandardScaler();
         searchScaler.fit(trainX);
-        double[][] scaledTrainX = searchScaler.transform(trainX);
-        double[][] scaledTestX = searchScaler.transform(testX);
+        double[][] searchScaledTrainX = searchScaler.transform(trainX);
+        double[][] searchScaledTestX = searchScaler.transform(testX);
         
         System.out.println("\n   Searching...");
-        for (double lr : learningRates) {
-            for (int iter : iterations) {
-                LogisticRegression model = new LogisticRegression(lr, iter);
-                model.fit(scaledTrainX, trainY);
-                int[] preds = model.predict(scaledTestX);
-                
-                int c = 0;
-                for (int i = 0; i < testY.length; i++) {
-                    if (preds[i] == testY[i]) c++;
-                }
-                double acc = (double) c / testY.length;
-                
-                if (acc > bestAccuracy) {
-                    bestAccuracy = acc;
-                    bestLR = lr;
-                    bestIter = iter;
-                }
+        for (int k : kValues) {
+            KNearestNeighbors model = new KNearestNeighbors(k);
+            model.train(searchScaledTrainX, trainY);
+            int[] preds = model.predict(searchScaledTestX);
+            
+            int c = 0;
+            for (int i = 0; i < testY.length; i++) {
+                if (preds[i] == testY[i]) c++;
+            }
+            double acc = (double) c / testY.length;
+            
+            if (acc > bestAccuracy) {
+                bestAccuracy = acc;
+                bestK = k;
             }
         }
         
         System.out.println("\n   Best Parameters Found:");
-        System.out.println("     learning_rate: " + bestLR);
-        System.out.println("     max_iterations: " + bestIter);
+        System.out.println("     k: " + bestK);
         System.out.println("     Best Accuracy: " + String.format("%.4f", bestAccuracy));
         
         // 5. Complete ML Workflow Summary
@@ -213,5 +228,24 @@ public class PipelineExample {
         System.out.println("\n" + "=".repeat(60));
         System.out.println("Example completed successfully!");
         System.out.println("=".repeat(60));
+    }
+    
+    private static double[][] extractColumns(double[][] X, int[] columns) {
+        double[][] result = new double[X.length][columns.length];
+        for (int i = 0; i < X.length; i++) {
+            for (int j = 0; j < columns.length; j++) {
+                result[i][j] = X[i][columns[j]];
+            }
+        }
+        return result;
+    }
+    
+    private static double[][] concatenate(double[][] a, double[][] b) {
+        double[][] result = new double[a.length][a[0].length + b[0].length];
+        for (int i = 0; i < a.length; i++) {
+            System.arraycopy(a[i], 0, result[i], 0, a[0].length);
+            System.arraycopy(b[i], 0, result[i], a[0].length, b[0].length);
+        }
+        return result;
     }
 }

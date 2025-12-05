@@ -54,12 +54,12 @@ public class FeatureEngineeringExample {
             System.out.println("     Feature " + i + ": " + String.format("%.4f", variances[i]));
         }
         
-        // 3. SelectKBest Feature Selection
+        // 3. SelectKBest Feature Selection - using enum instead of String
         System.out.println("\n3. SelectKBest Selection:");
         System.out.println("-".repeat(40));
         
         int k = 5;
-        SelectKBest kBest = new SelectKBest(k, "f_classif");
+        SelectKBest kBest = new SelectKBest(SelectKBest.ScoreFunction.F_CLASSIF, k);
         kBest.fit(X, y);
         double[][] X_kbest = kBest.transform(X);
         

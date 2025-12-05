@@ -33,10 +33,17 @@
         </dependency>
 
         <!-- ND4J for numerical computing (like NumPy for Java) -->
+        <!-- Using Linux-specific native to speed up build -->
         <dependency>
             <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native-platform</artifactId>
+            <artifactId>nd4j-native</artifactId>
             <version>${nd4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native</artifactId>
+            <version>${nd4j.version}</version>
+            <classifier>linux-x86_64</classifier>
         </dependency>
 
         <!-- SLF4J for logging -->

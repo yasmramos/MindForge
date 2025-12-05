@@ -65,10 +65,10 @@ public class NeuralNetworkExample {
         System.out.println("\n3. Building Neural Network Architecture...");
         NeuralNetwork nn = new NeuralNetwork(0.01, 100, 16);
         
-        // Add layers
-        nn.addDenseLayer(4, 16, "relu");      // Input -> Hidden 1
-        nn.addDenseLayer(16, 8, "relu");      // Hidden 1 -> Hidden 2
-        nn.addDenseLayer(8, 3, "softmax");    // Hidden 2 -> Output
+        // Add layers with proper enum activation functions
+        nn.addDenseLayer(4, 16, ActivationFunction.RELU);      // Input -> Hidden 1
+        nn.addDenseLayer(16, 8, ActivationFunction.RELU);      // Hidden 1 -> Hidden 2
+        nn.addDenseLayer(8, 3, ActivationFunction.SOFTMAX);    // Hidden 2 -> Output
         
         System.out.println("   Architecture:");
         System.out.println("   - Input Layer: 4 neurons (features)");
@@ -81,6 +81,7 @@ public class NeuralNetworkExample {
         
         // Train the network
         System.out.println("\n4. Training the Neural Network...");
+        nn.setVerbose(false);
         nn.fit(trainX, trainY);
         System.out.println("   Training completed!");
         

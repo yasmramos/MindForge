@@ -1,7 +1,6 @@
 package com.mindforge.examples;
 
 import com.mindforge.validation.*;
-import com.mindforge.classification.LogisticRegression;
 import com.mindforge.data.Dataset;
 import com.mindforge.data.DatasetLoader;
 import com.mindforge.preprocessing.StandardScaler;
@@ -39,32 +38,34 @@ public class ValidationMetricsExample {
         System.out.println("-".repeat(40));
         ConfusionMatrix cm = new ConfusionMatrix(yTrue, yPred);
         
-        System.out.println("   True Positives (TP):  " + cm.getTruePositives());
-        System.out.println("   True Negatives (TN):  " + cm.getTrueNegatives());
-        System.out.println("   False Positives (FP): " + cm.getFalsePositives());
-        System.out.println("   False Negatives (FN): " + cm.getFalseNegatives());
+        int positiveClassIndex = 1;  // Define positive class for binary classification
+        System.out.println("   True Positives (TP):  " + cm.getTruePositives(positiveClassIndex));
+        System.out.println("   True Negatives (TN):  " + cm.getTrueNegatives(positiveClassIndex));
+        System.out.println("   False Positives (FP): " + cm.getFalsePositives(positiveClassIndex));
+        System.out.println("   False Negatives (FN): " + cm.getFalseNegatives(positiveClassIndex));
         
         System.out.println("\n   Confusion Matrix:");
         System.out.println("                  Predicted");
         System.out.println("                  0      1");
-        System.out.println("   Actual  0    [" + cm.getTrueNegatives() + "]    [" + cm.getFalsePositives() + "]");
-        System.out.println("           1    [" + cm.getFalseNegatives() + "]    [" + cm.getTruePositives() + "]");
+        System.out.println("   Actual  0    [" + cm.getTrueNegatives(positiveClassIndex) + "]    [" + cm.getFalsePositives(positiveClassIndex) + "]");
+        System.out.println("           1    [" + cm.getFalseNegatives(positiveClassIndex) + "]    [" + cm.getTruePositives(positiveClassIndex) + "]");
         
         // Metrics from Confusion Matrix
         System.out.println("\n3. Classification Metrics:");
         System.out.println("-".repeat(40));
         System.out.println("   Accuracy:  " + String.format("%.4f", cm.getAccuracy()));
-        System.out.println("   Precision: " + String.format("%.4f", cm.getPrecision()));
-        System.out.println("   Recall:    " + String.format("%.4f", cm.getRecall()));
-        System.out.println("   F1-Score:  " + String.format("%.4f", cm.getF1Score()));
+        System.out.println("   Precision: " + String.format("%.4f", cm.getPrecision(positiveClassIndex)));
+        System.out.println("   Recall:    " + String.format("%.4f", cm.getRecall(positiveClassIndex)));
+        System.out.println("   F1-Score:  " + String.format("%.4f", cm.getF1Score(positiveClassIndex)));
         
-        // Using Metrics class directly
+        // Using Metrics class directly with positiveClass parameter
         System.out.println("\n4. Using Metrics Class:");
         System.out.println("-".repeat(40));
+        int positiveClass = 1;  // Define positive class for binary classification
         System.out.println("   Accuracy:  " + String.format("%.4f", Metrics.accuracy(yTrue, yPred)));
-        System.out.println("   Precision: " + String.format("%.4f", Metrics.precision(yTrue, yPred)));
-        System.out.println("   Recall:    " + String.format("%.4f", Metrics.recall(yTrue, yPred)));
-        System.out.println("   F1-Score:  " + String.format("%.4f", Metrics.f1Score(yTrue, yPred)));
+        System.out.println("   Precision: " + String.format("%.4f", Metrics.precision(yTrue, yPred, positiveClass)));
+        System.out.println("   Recall:    " + String.format("%.4f", Metrics.recall(yTrue, yPred, positiveClass)));
+        System.out.println("   F1-Score:  " + String.format("%.4f", Metrics.f1Score(yTrue, yPred, positiveClass)));
         
         // ROC Curve and AUC
         System.out.println("\n5. ROC Curve and AUC:");

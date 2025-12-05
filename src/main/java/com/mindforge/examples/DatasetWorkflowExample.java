@@ -9,7 +9,7 @@ import com.mindforge.util.ArrayUtils;
  * 
  * This example shows:
  * - Loading built-in datasets (Iris, Wine, Breast Cancer)
- * - Creating synthetic datasets (blobs, circles)
+ * - Creating synthetic datasets (classification, circles)
  * - Train/test splitting with stratification
  * - Data preprocessing and normalization
  * - Dataset manipulation operations
@@ -53,15 +53,15 @@ public class DatasetWorkflowExample {
         System.out.println("\n2. Creating Synthetic Datasets:");
         System.out.println("-".repeat(40));
         
-        // Blobs for clustering
-        Dataset blobs = DatasetLoader.makeBlobs(200, 3, 2, 1.0);
-        System.out.println("   Blobs Dataset:");
-        System.out.println("     Samples: " + blobs.getFeatures().length);
-        System.out.println("     Features: " + blobs.getFeatures()[0].length);
-        System.out.println("     Centers: 3");
+        // Classification dataset (similar to blobs)
+        Dataset syntheticClassif = DatasetLoader.makeClassification(200, 2, 3, 42L);
+        System.out.println("   Synthetic Classification Dataset:");
+        System.out.println("     Samples: " + syntheticClassif.getFeatures().length);
+        System.out.println("     Features: " + syntheticClassif.getFeatures()[0].length);
+        System.out.println("     Classes: 3");
         
         // Circles for non-linear classification
-        Dataset circles = DatasetLoader.makeCircles(150, 0.1, 0.5);
+        Dataset circles = DatasetLoader.makeCircles(75, 0.1, 42L);
         System.out.println("\n   Circles Dataset:");
         System.out.println("     Samples: " + circles.getFeatures().length);
         System.out.println("     Features: 2");
@@ -71,7 +71,8 @@ public class DatasetWorkflowExample {
         System.out.println("\n3. Train/Test Split:");
         System.out.println("-".repeat(40));
         
-        Dataset[] split = iris.trainTestSplit(0.2);
+        // trainTestSplit requires (testSize, seed)
+        Dataset[] split = iris.trainTestSplit(0.2, 42L);
         Dataset trainSet = split[0];
         Dataset testSet = split[1];
         
@@ -85,8 +86,9 @@ public class DatasetWorkflowExample {
             iris.getFeatures(), iris.getLabels(), 0.2, 42
         );
         
-        System.out.println("     Training samples: " + stratifiedSplit.getTrainX().length);
-        System.out.println("     Test samples: " + stratifiedSplit.getTestX().length);
+        // Access public fields directly instead of methods
+        System.out.println("     Training samples: " + stratifiedSplit.XTrain.length);
+        System.out.println("     Test samples: " + stratifiedSplit.XTest.length);
         System.out.println("     (Class distribution preserved)");
         
         // 4. Data Preprocessing
@@ -124,21 +126,9 @@ public class DatasetWorkflowExample {
         System.out.println("\n5. Dataset Operations:");
         System.out.println("-".repeat(40));
         
-        // Shuffle
-        System.out.println("   Shuffling dataset...");
-        Dataset shuffled = iris.shuffle();
-        System.out.println("     Dataset shuffled successfully");
-        
-        // Normalize
-        System.out.println("\n   Normalizing dataset (in-place)...");
-        Dataset normalized = iris.normalize();
-        System.out.println("     Dataset normalized successfully");
-        
         // Subset
-        System.out.println("\n   Creating subset (first 50 samples)...");
-        int[] indices = new int[50];
-        for (int i = 0; i < 50; i++) indices[i] = i;
-        Dataset subset = iris.subset(indices);
+        System.out.println("   Creating subset (first 50 samples)...");
+        Dataset subset = iris.subset(0, 50);
         System.out.println("     Subset size: " + subset.getFeatures().length);
         
         // 6. Label Encoding
@@ -192,7 +182,7 @@ public class DatasetWorkflowExample {
         System.out.println("   Original (with NaN):");
         printMatrix(dataWithNaN, "     ");
         
-        SimpleImputer imputer = new SimpleImputer("mean");
+        SimpleImputer imputer = new SimpleImputer(SimpleImputer.ImputeStrategy.MEAN);
         imputer.fit(dataWithNaN);
         double[][] imputed = imputer.transform(dataWithNaN);
         
