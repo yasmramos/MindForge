@@ -137,16 +137,65 @@ public class SVR implements Regressor<double[]> {
     private void trainLinear(double[][] X, double[] y) {
         int n = X.length;
         
+        // Normalize features for better convergence
+        double[] featureMean = new double[numFeatures];
+        double[] featureStd = new double[numFeatures];
+        
+        for (int f = 0; f < numFeatures; f++) {
+            double sum = 0.0;
+            for (int i = 0; i < n; i++) {
+                sum += X[i][f];
+            }
+            featureMean[f] = sum / n;
+            
+            double sumSq = 0.0;
+            for (int i = 0; i < n; i++) {
+                double diff = X[i][f] - featureMean[f];
+                sumSq += diff * diff;
+            }
+            featureStd[f] = Math.sqrt(sumSq / n);
+            if (featureStd[f] < 1e-10) {
+                featureStd[f] = 1.0;
+            }
+        }
+        
+        // Normalize X
+        double[][] Xnorm = new double[n][numFeatures];
+        for (int i = 0; i < n; i++) {
+            for (int f = 0; f < numFeatures; f++) {
+                Xnorm[i][f] = (X[i][f] - featureMean[f]) / featureStd[f];
+            }
+        }
+        
+        // Normalize y
+        double yMean = 0.0;
+        for (double val : y) {
+            yMean += val;
+        }
+        yMean /= n;
+        
+        double yStd = 0.0;
+        for (double val : y) {
+            yStd += (val - yMean) * (val - yMean);
+        }
+        yStd = Math.sqrt(yStd / n);
+        if (yStd < 1e-10) {
+            yStd = 1.0;
+        }
+        
+        double[] yNorm = new double[n];
+        for (int i = 0; i < n; i++) {
+            yNorm[i] = (y[i] - yMean) / yStd;
+        }
+        
         // Initialize weights and bias
         weights = new double[numFeatures];
         bias = 0.0;
         
-        Random random = new Random(42);
-        for (int f = 0; f < numFeatures; f++) {
-            weights[f] = random.nextGaussian() * 0.01;
-        }
+        // Adaptive learning rate based on problem size
+        double adaptiveLr = learningRate * Math.min(1.0, 10.0 / numFeatures);
         
-        // Subgradient descent optimization
+        // Subgradient descent optimization with full batch for stability
         double prevLoss = Double.MAX_VALUE;
         
         for (int iter = 0; iter < maxIter; iter++) {
@@ -154,25 +203,22 @@ public class SVR implements Regressor<double[]> {
             double gradB = 0.0;
             double loss = 0.0;
             
-            // Shuffle indices for stochastic gradient descent
-            int[] indices = new int[n];
-            for (int i = 0; i < n; i++) indices[i] = i;
-            shuffleArray(indices, random);
-            
-            // Compute gradients using mini-batch
-            int batchSize = Math.min(32, n);
-            for (int b = 0; b < batchSize; b++) {
-                int i = indices[b];
-                double prediction = computeLinearPrediction(X[i]);
-                double error = prediction - y[i];
+            // Full batch gradient for stability in high dimensions
+            for (int i = 0; i < n; i++) {
+                double prediction = bias;
+                for (int f = 0; f < numFeatures; f++) {
+                    prediction += weights[f] * Xnorm[i][f];
+                }
+                double error = prediction - yNorm[i];
                 
                 // Epsilon-insensitive loss and subgradient
-                if (Math.abs(error) > epsilon) {
+                double scaledEpsilon = epsilon / yStd;
+                if (Math.abs(error) > scaledEpsilon) {
                     double sign = error > 0 ? 1.0 : -1.0;
-                    loss += Math.abs(error) - epsilon;
+                    loss += Math.abs(error) - scaledEpsilon;
                     
                     for (int f = 0; f < numFeatures; f++) {
-                        gradW[f] += sign * X[i][f];
+                        gradW[f] += sign * Xnorm[i][f];
                     }
                     gradB += sign;
                 }
@@ -180,9 +226,9 @@ public class SVR implements Regressor<double[]> {
             
             // Normalize gradients
             for (int f = 0; f < numFeatures; f++) {
-                gradW[f] /= batchSize;
+                gradW[f] /= n;
             }
-            gradB /= batchSize;
+            gradB /= n;
             
             // Add L2 regularization gradient
             for (int f = 0; f < numFeatures; f++) {
@@ -190,8 +236,8 @@ public class SVR implements Regressor<double[]> {
                 gradW[f] += (1.0 / C) * weights[f];
             }
             
-            // Adaptive learning rate
-            double lr = learningRate / (1.0 + 0.01 * iter);
+            // Adaptive learning rate with decay
+            double lr = adaptiveLr / (1.0 + 0.001 * iter);
             
             // Update weights and bias
             for (int f = 0; f < numFeatures; f++) {
@@ -200,10 +246,25 @@ public class SVR implements Regressor<double[]> {
             bias -= lr * gradB;
             
             // Check convergence
-            if (Math.abs(prevLoss - loss) < tol && iter > 10) {
+            if (iter > 100 && Math.abs(prevLoss - loss) < tol) {
                 break;
             }
             prevLoss = loss;
+        }
+        
+        // Transform weights back to original scale
+        for (int f = 0; f < numFeatures; f++) {
+            weights[f] = weights[f] * yStd / featureStd[f];
+        }
+        
+        // Adjust bias for original scale
+        double biasAdjust = 0.0;
+        for (int f = 0; f < numFeatures; f++) {
+            biasAdjust += weights[f] * featureMean[f] / (yStd / featureStd[f]) * featureStd[f];
+        }
+        bias = bias * yStd + yMean;
+        for (int f = 0; f < numFeatures; f++) {
+            bias -= weights[f] * featureMean[f];
         }
     }
     
@@ -220,7 +281,8 @@ public class SVR implements Regressor<double[]> {
     }
     
     /**
-     * Trains using non-linear kernels with SMO algorithm (dual form).
+     * Trains using non-linear kernels with SMO-style algorithm (dual form).
+     * Optimizes the dual formulation of epsilon-SVR.
      */
     private void trainWithKernel(double[][] X, double[] y) {
         int n = X.length;
@@ -236,124 +298,105 @@ public class SVR implements Regressor<double[]> {
         // Precompute kernel matrix
         double[][] K = kernel.computeMatrix(X);
         
-        // Initialize alphas (alpha+ and alpha-)
-        alphaPositive = new double[n];  // For samples above tube
-        alphaNegative = new double[n];  // For samples below tube
+        // Add small regularization to diagonal for numerical stability
+        double[] diagK = new double[n];
+        for (int i = 0; i < n; i++) {
+            diagK[i] = K[i][i];
+            K[i][i] += 1e-6;
+        }
+        
+        // Initialize alphas using a combined representation
+        // alpha[i] = alphaPositive[i] - alphaNegative[i], range [-C, C]
+        alphaPositive = new double[n];
+        alphaNegative = new double[n];
+        double[] alpha = new double[n];  // Combined alpha
+        
+        // Initialize gradient (g_i = -y_i initially since f(x_i) = 0)
+        double[] gradient = new double[n];
+        for (int i = 0; i < n; i++) {
+            gradient[i] = -y[i];
+        }
+        
         biasKernel = 0.0;
         
-        // Simplified SMO for SVR
         Random random = new Random(42);
-        int passes = 0;
-        int maxPasses = 10;
         
-        while (passes < maxPasses) {
-            int numChangedAlphas = 0;
+        // Multiple passes for convergence
+        for (int iter = 0; iter < maxIter; iter++) {
+            double maxViolation = 0.0;
             
-            for (int i = 0; i < n; i++) {
-                // Compute prediction and error
-                double fi = computeKernelPredictionTraining(K, i);
-                double error = fi - y[i];
+            // Shuffle indices for randomized coordinate descent
+            int[] indices = new int[n];
+            for (int i = 0; i < n; i++) indices[i] = i;
+            shuffleArray(indices, random);
+            
+            for (int idx = 0; idx < n; idx++) {
+                int i = indices[idx];
                 
-                // Check KKT conditions for alpha+
-                if ((error > epsilon && alphaPositive[i] < C) ||
-                    (error < epsilon && alphaPositive[i] > 0)) {
-                    
-                    // Select random j != i
-                    int j;
-                    do {
-                        j = random.nextInt(n);
-                    } while (j == i);
-                    
-                    double fj = computeKernelPredictionTraining(K, j);
-                    double errorJ = fj - y[j];
-                    
-                    // Compute eta
-                    double eta = K[i][i] + K[j][j] - 2 * K[i][j];
-                    if (eta <= 0) continue;
-                    
-                    // Save old values
-                    double oldAlphaI = alphaPositive[i];
-                    double oldAlphaJ = alphaPositive[j];
-                    
-                    // Compute new alpha_j
-                    double newAlphaJ = oldAlphaJ + (error - errorJ) / eta;
-                    
-                    // Clip alpha_j
-                    double L = Math.max(0, oldAlphaJ + oldAlphaI - C);
-                    double H = Math.min(C, oldAlphaJ + oldAlphaI);
-                    newAlphaJ = Math.max(L, Math.min(H, newAlphaJ));
-                    
-                    if (Math.abs(newAlphaJ - oldAlphaJ) < 1e-5) continue;
-                    
-                    // Compute new alpha_i
-                    double newAlphaI = oldAlphaI + (oldAlphaJ - newAlphaJ);
-                    
-                    // Update alphas
-                    alphaPositive[i] = Math.max(0, Math.min(C, newAlphaI));
-                    alphaPositive[j] = Math.max(0, Math.min(C, newAlphaJ));
-                    
-                    // Update bias
-                    double b1 = y[i] + epsilon - fi + 
-                        (alphaPositive[i] - oldAlphaI) * K[i][i] +
-                        (alphaPositive[j] - oldAlphaJ) * K[i][j];
-                    double b2 = y[j] + epsilon - fj +
-                        (alphaPositive[i] - oldAlphaI) * K[i][j] +
-                        (alphaPositive[j] - oldAlphaJ) * K[j][j];
-                    
-                    if (alphaPositive[i] > 0 && alphaPositive[i] < C) {
-                        biasKernel = b1;
-                    } else if (alphaPositive[j] > 0 && alphaPositive[j] < C) {
-                        biasKernel = b2;
-                    } else {
-                        biasKernel = (b1 + b2) / 2;
+                // Current prediction error
+                double G = gradient[i];
+                
+                // Compute optimal step based on epsilon-tube conditions
+                // For epsilon-SVR, we need to consider the epsilon-insensitive loss
+                
+                double oldAlpha = alpha[i];
+                double newAlpha = oldAlpha;
+                
+                // Compute optimal unconstrained update
+                // The gradient of the dual objective is: sum_j(alpha_j * K_ij) - y_i + epsilon*sign(alpha_i)
+                // For simplicity, we use gradient descent with the current gradient
+                
+                if (G + epsilon < 0) {
+                    // Want to increase alpha (prediction too low)
+                    // alpha_i should be positive (alpha+ contribution)
+                    double step = -(G + epsilon) / K[i][i];
+                    newAlpha = Math.min(C, oldAlpha + step);
+                } else if (G - epsilon > 0) {
+                    // Want to decrease alpha (prediction too high)
+                    // alpha_i should be negative (alpha- contribution)
+                    double step = (G - epsilon) / K[i][i];
+                    newAlpha = Math.max(-C, oldAlpha - step);
+                } else {
+                    // Within epsilon tube - shrink alpha towards 0
+                    if (oldAlpha > 0) {
+                        newAlpha = Math.max(0, oldAlpha - 0.01 * K[i][i]);
+                    } else if (oldAlpha < 0) {
+                        newAlpha = Math.min(0, oldAlpha + 0.01 * K[i][i]);
                     }
-                    
-                    numChangedAlphas++;
                 }
                 
-                // Similar process for alpha-
-                if ((-error > epsilon && alphaNegative[i] < C) ||
-                    (-error < epsilon && alphaNegative[i] > 0)) {
+                // Apply update if significant
+                double deltaAlpha = newAlpha - oldAlpha;
+                if (Math.abs(deltaAlpha) > 1e-10) {
+                    alpha[i] = newAlpha;
                     
-                    int j;
-                    do {
-                        j = random.nextInt(n);
-                    } while (j == i);
+                    // Update gradients for all samples
+                    for (int j = 0; j < n; j++) {
+                        gradient[j] += deltaAlpha * K[i][j];
+                    }
                     
-                    double fj = computeKernelPredictionTraining(K, j);
-                    double errorJ = fj - y[j];
-                    
-                    double eta = K[i][i] + K[j][j] - 2 * K[i][j];
-                    if (eta <= 0) continue;
-                    
-                    double oldAlphaI = alphaNegative[i];
-                    double oldAlphaJ = alphaNegative[j];
-                    
-                    double newAlphaJ = oldAlphaJ + (-error + errorJ) / eta;
-                    
-                    double L = Math.max(0, oldAlphaJ + oldAlphaI - C);
-                    double H = Math.min(C, oldAlphaJ + oldAlphaI);
-                    newAlphaJ = Math.max(L, Math.min(H, newAlphaJ));
-                    
-                    if (Math.abs(newAlphaJ - oldAlphaJ) < 1e-5) continue;
-                    
-                    double newAlphaI = oldAlphaI + (oldAlphaJ - newAlphaJ);
-                    
-                    alphaNegative[i] = Math.max(0, Math.min(C, newAlphaI));
-                    alphaNegative[j] = Math.max(0, Math.min(C, newAlphaJ));
-                    
-                    numChangedAlphas++;
+                    maxViolation = Math.max(maxViolation, Math.abs(deltaAlpha));
                 }
             }
             
-            if (numChangedAlphas == 0) {
-                passes++;
-            } else {
-                passes = 0;
+            // Check convergence
+            if (maxViolation < tol && iter > 10) {
+                break;
             }
         }
         
-        // Compute final bias
+        // Convert combined alpha back to alpha+ and alpha-
+        for (int i = 0; i < n; i++) {
+            if (alpha[i] > 0) {
+                alphaPositive[i] = alpha[i];
+                alphaNegative[i] = 0;
+            } else {
+                alphaPositive[i] = 0;
+                alphaNegative[i] = -alpha[i];
+            }
+        }
+        
+        // Compute bias using free support vectors
         computeFinalBias(K);
     }
     
@@ -372,30 +415,61 @@ public class SVR implements Regressor<double[]> {
      * Computes the final bias term.
      */
     private void computeFinalBias(double[][] K) {
+        int n = supportVectors.length;
         int count = 0;
         double sumBias = 0.0;
         
-        for (int i = 0; i < supportVectors.length; i++) {
-            if ((alphaPositive[i] > 1e-8 && alphaPositive[i] < C - 1e-8) ||
-                (alphaNegative[i] > 1e-8 && alphaNegative[i] < C - 1e-8)) {
-                
+        // First, try to compute bias from free support vectors
+        for (int i = 0; i < n; i++) {
+            double alpha = alphaPositive[i] - alphaNegative[i];
+            if (Math.abs(alpha) > 1e-8) {
+                boolean isFree = (alphaPositive[i] > 1e-8 && alphaPositive[i] < C - 1e-8) ||
+                                 (alphaNegative[i] > 1e-8 && alphaNegative[i] < C - 1e-8);
+                if (isFree) {
+                    double fi = 0.0;
+                    for (int j = 0; j < n; j++) {
+                        fi += (alphaPositive[j] - alphaNegative[j]) * K[i][j];
+                    }
+                    
+                    if (alphaPositive[i] > 1e-8) {
+                        sumBias += supportVectorTargets[i] - fi - epsilon;
+                    } else {
+                        sumBias += supportVectorTargets[i] - fi + epsilon;
+                    }
+                    count++;
+                }
+            }
+        }
+        
+        if (count > 0) {
+            biasKernel = sumBias / count;
+            return;
+        }
+        
+        // Fallback: compute bias from all support vectors
+        for (int i = 0; i < n; i++) {
+            double alpha = alphaPositive[i] - alphaNegative[i];
+            if (Math.abs(alpha) > 1e-8) {
                 double fi = 0.0;
-                for (int j = 0; j < supportVectors.length; j++) {
+                for (int j = 0; j < n; j++) {
                     fi += (alphaPositive[j] - alphaNegative[j]) * K[i][j];
                 }
-                
-                if (alphaPositive[i] > 1e-8 && alphaPositive[i] < C - 1e-8) {
-                    sumBias += supportVectorTargets[i] - fi - epsilon;
-                } else if (alphaNegative[i] > 1e-8 && alphaNegative[i] < C - 1e-8) {
-                    sumBias += supportVectorTargets[i] - fi + epsilon;
-                }
+                sumBias += supportVectorTargets[i] - fi;
                 count++;
             }
         }
         
         if (count > 0) {
             biasKernel = sumBias / count;
+            return;
         }
+        
+        // Last resort: compute bias from mean of targets
+        double yMean = 0.0;
+        for (int i = 0; i < n; i++) {
+            yMean += supportVectorTargets[i];
+        }
+        biasKernel = yMean / n;
     }
     
     /**
