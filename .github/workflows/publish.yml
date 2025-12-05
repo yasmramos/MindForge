@@ -20,8 +20,17 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          server-id: github
-          settings-path: ${{ github.workspace }}
+          cache: maven
+
+      - name: Configure Maven settings
+        uses: s4u/maven-settings-action@v3.1.0
+        with:
+          servers: |
+            [{
+              "id": "github",
+              "username": "${{ github.actor }}",
+              "password": "${{ secrets.GITHUB_TOKEN }}"
+            }]
 
       - name: Build and publish to GitHub Packages
         run: mvn deploy -DskipTests
