@@ -59,14 +59,16 @@ public class QuickStart {
 
 ### Core Algorithms
 - **Classification**: K-Nearest Neighbors (KNN), Decision Trees, Random Forest, Logistic Regression, Naive Bayes (Gaussian, Multinomial, Bernoulli), Support Vector Machines (SVM), Gradient Boosting
-- **Regression**: Linear Regression, Ridge Regression (L2 regularization)
+- **Regression**: Linear Regression, Ridge Regression (L2), Lasso Regression (L1), ElasticNet, Polynomial Regression, Support Vector Regression (SVR) with multiple kernels (Linear, RBF, Polynomial, Sigmoid)
 - **Clustering**: K-Means with multiple initialization strategies
+- **Dimensionality Reduction**: PCA, Linear Discriminant Analysis (LDA) for supervised dimensionality reduction
 - **Neural Networks**: Multi-Layer Perceptron (MLP) with backpropagation, multiple activation functions (Sigmoid, ReLU, Tanh, Softmax, Leaky ReLU, ELU), Dropout and Batch Normalization layers
+- **Recurrent Neural Networks**: RNN and LSTM (Long Short-Term Memory) for sequence modeling
+- **GPU/CPU Acceleration**: Hardware acceleration for compute-intensive operations
 
 ### Data Processing
 - **Preprocessing**: MinMaxScaler, StandardScaler, SimpleImputer, LabelEncoder, DataSplit
 - **Feature Selection**: VarianceThreshold, SelectKBest (F-test, Chi2, Mutual Info), RFE (Recursive Feature Elimination)
-- **Dimensionality Reduction**: PCA (Principal Component Analysis)
 - **Pipelines**: Chain transformers and estimators for streamlined workflows
 - **Dataset Management**: Built-in datasets (Iris, Wine, Breast Cancer, Boston Housing), train/test splitting
 
@@ -135,7 +137,39 @@ MindForge/
 
 ## 📥 Installation
 
-### Option 1: Download JAR (Recommended)
+### Option 1: GitHub Packages (Recommended)
+
+Add the GitHub Packages repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>github</id>
+        <url>https://maven.pkg.github.com/yasmramos/MindForge</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>com.mindforge</groupId>
+        <artifactId>mindforge</artifactId>
+        <version>1.2.0-alpha</version>
+    </dependency>
+</dependencies>
+```
+
+**Note:** You need to authenticate with GitHub Packages. Add this to your `~/.m2/settings.xml`:
+```xml
+<servers>
+    <server>
+        <id>github</id>
+        <username>YOUR_GITHUB_USERNAME</username>
+        <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+</servers>
+```
+
+### Option 2: Download JAR
 
 Download the latest release from [GitHub Releases](https://github.com/yasmramos/MindForge/releases) and add it to your project:
 
@@ -144,15 +178,6 @@ Download the latest release from [GitHub Releases](https://github.com/yasmramos/
 mvn install:install-file -Dfile=mindforge-1.2.0-alpha.jar \
   -DgroupId=com.mindforge -DartifactId=mindforge \
   -Dversion=1.2.0-alpha -Dpackaging=jar
-```
-
-Then add to your `pom.xml`:
-```xml
-<dependency>
-    <groupId>com.mindforge</groupId>
-    <artifactId>mindforge</artifactId>
-    <version>1.2.0-alpha</version>
-</dependency>
 ```
 
 ### Option 2: Build from Source
@@ -510,6 +535,141 @@ System.out.println("Prediction: " + prediction);
 double[] predictions = lr.predict(X_train);
 double rmse = Metrics.rmse(y_train, predictions);
 System.out.println("RMSE: " + rmse);
+```
+
+### Advanced Regression (Ridge, Lasso, ElasticNet, SVR)
+
+```java
+import com.mindforge.regression.*;
+import com.mindforge.validation.Metrics;
+
+// Training data
+double[][] X = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+double[] y = {2.1, 4.0, 5.9, 8.1, 10.0, 12.1, 13.9, 16.0};
+
+// === Ridge Regression (L2 regularization) ===
+RidgeRegression ridge = new RidgeRegression(1.0); // alpha = 1.0
+ridge.train(X, y);
+double[] ridgePred = ridge.predict(X);
+System.out.println("Ridge R²: " + Metrics.r2Score(y, ridgePred));
+
+// === Lasso Regression (L1 regularization) ===
+LassoRegression lasso = new LassoRegression(0.1); // alpha = 0.1
+lasso.train(X, y);
+double[] lassoPred = lasso.predict(X);
+System.out.println("Lasso R²: " + Metrics.r2Score(y, lassoPred));
+
+// === ElasticNet (L1 + L2 combined) ===
+ElasticNetRegression elasticnet = new ElasticNetRegression(0.1, 0.5); // alpha, l1_ratio
+elasticnet.train(X, y);
+double[] enPred = elasticnet.predict(X);
+System.out.println("ElasticNet R²: " + Metrics.r2Score(y, enPred));
+
+// === Polynomial Regression ===
+PolynomialRegression poly = new PolynomialRegression(2); // degree = 2
+poly.train(X, y);
+double polyPred = poly.predict(new double[]{9});
+System.out.println("Polynomial prediction for x=9: " + polyPred);
+
+// === Support Vector Regression (SVR) ===
+// Linear kernel
+SVR svrLinear = new SVR.Builder()
+    .kernel(SVR.KernelType.LINEAR)
+    .C(1.0)
+    .epsilon(0.1)
+    .build();
+svrLinear.train(X, y);
+
+// RBF kernel (for non-linear patterns)
+SVR svrRBF = new SVR.Builder()
+    .kernel(SVR.KernelType.RBF)
+    .C(10.0)
+    .epsilon(0.1)
+    .gamma(0.5)
+    .build();
+svrRBF.train(X, y);
+System.out.println("SVR Support Vectors: " + svrRBF.getNumSupportVectors());
+
+// Polynomial kernel
+SVR svrPoly = new SVR.Builder()
+    .kernel(SVR.KernelType.POLYNOMIAL)
+    .C(1.0)
+    .degree(3)
+    .build();
+svrPoly.train(X, y);
+```
+
+### Linear Discriminant Analysis (LDA)
+
+```java
+import com.mindforge.decomposition.LinearDiscriminantAnalysis;
+
+// Training data with 3 classes
+double[][] X = {
+    {4.0, 2.0}, {4.5, 2.5}, {4.2, 2.1},  // Class 0
+    {1.0, 4.0}, {1.5, 4.5}, {1.2, 4.2},  // Class 1
+    {5.0, 5.0}, {5.5, 5.5}, {5.2, 5.2}   // Class 2
+};
+int[] y = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+
+// Create LDA for dimensionality reduction
+LinearDiscriminantAnalysis lda = new LinearDiscriminantAnalysis(2); // 2 components
+lda.fit(X, y);
+
+// Transform data to lower dimensions
+double[][] X_transformed = lda.transform(X);
+System.out.println("Original dimensions: " + X[0].length);
+System.out.println("Transformed dimensions: " + X_transformed[0].length);
+
+// Use as classifier
+int[] predictions = lda.predict(X);
+System.out.println("Predictions: " + Arrays.toString(predictions));
+
+// Get explained variance ratio
+double[] varianceRatio = lda.getExplainedVarianceRatio();
+System.out.println("Explained variance: " + Arrays.toString(varianceRatio));
+```
+
+### Recurrent Neural Networks (RNN/LSTM)
+
+```java
+import com.mindforge.neural.rnn.*;
+
+// === Simple RNN for sequence prediction ===
+int inputSize = 10;    // Input features per timestep
+int hiddenSize = 32;   // Hidden state size
+int outputSize = 5;    // Output size
+
+SimpleRNN rnn = new SimpleRNN(inputSize, hiddenSize, outputSize);
+
+// Training sequence data (batch_size, seq_length, input_size)
+double[][][] sequences = new double[100][20][inputSize];
+double[][] targets = new double[100][outputSize];
+// ... populate with data ...
+
+rnn.fit(sequences, targets, 100, 0.01); // epochs, learning_rate
+
+// Predict
+double[][] output = rnn.predict(sequences[0]);
+
+// === LSTM for long sequences ===
+LSTM lstm = new LSTM.Builder()
+    .inputSize(inputSize)
+    .hiddenSize(64)
+    .outputSize(outputSize)
+    .numLayers(2)           // Stacked LSTM layers
+    .dropout(0.2)           // Dropout between layers
+    .build();
+
+lstm.fit(sequences, targets, 100, 0.001);
+
+// LSTM handles long-term dependencies better
+double[][] lstmOutput = lstm.predict(sequences[0]);
+System.out.println("LSTM output shape: " + lstmOutput.length + " x " + lstmOutput[0].length);
+
+// Get hidden states for analysis
+double[][] hiddenStates = lstm.getLastHiddenState();
+double[][] cellStates = lstm.getLastCellState();
 ```
 
 ### Clustering with K-Means
@@ -942,7 +1102,7 @@ mvn test
 
 All tests should pass:
 ```
-Tests run: 437, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 1406, Failures: 0, Errors: 0, Skipped: 2
 BUILD SUCCESS
 ```
 
@@ -950,7 +1110,7 @@ BUILD SUCCESS
 
 MindForge uses **JaCoCo** for code coverage analysis.
 
-### Current Coverage (v1.0.8-alpha)
+### Current Coverage (v1.2.0-alpha)
 
 | Metric | Coverage |
 |--------|----------|
@@ -1168,12 +1328,17 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 - [x] Array Utilities
 - [x] Visualization (Chart generation)
 - [x] REST API Server for model serving
+- [x] **Ridge, Lasso, ElasticNet Regression** (v1.2.0)
+- [x] **Polynomial Regression** (v1.2.0)
+- [x] **Support Vector Regression (SVR)** with RBF, Polynomial, Sigmoid kernels (v1.2.0)
+- [x] **Linear Discriminant Analysis (LDA)** (v1.2.0)
+- [x] **RNN/LSTM** Recurrent Neural Networks (v1.2.0)
+- [x] **GPU/CPU Acceleration** (v1.2.0)
 
 ### In Progress
-- [ ] Deep Learning support (CNN, RNN)
+- [ ] Deep Learning support (CNN)
 - [ ] Advanced ensemble methods (AdaBoost, XGBoost)
-- [ ] SVM Kernels (RBF, Polynomial)
-- [ ] GPU acceleration
+- [ ] Transformer architecture
 
 ## 📄 Project Information
 
