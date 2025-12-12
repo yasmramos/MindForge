@@ -203,4 +203,51 @@ class AdvancedClassifiersTest {
             assertTrue(score > 0.5);
         }
     }
+    
+    @Nested
+    @DisplayName("LinearDiscriminantAnalysis Tests")
+    class LDATests {
+        
+        @Test
+        @DisplayName("Builder works")
+        void testBuilder() {
+            LinearDiscriminantAnalysis lda = new LinearDiscriminantAnalysis.Builder().build();
+            assertNotNull(lda);
+        }
+        
+        @Test
+        @DisplayName("Train and predict")
+        void testTrainAndPredict() {
+            LinearDiscriminantAnalysis lda = new LinearDiscriminantAnalysis.Builder().build();
+            lda.train(X, y);
+            
+            assertTrue(lda.isTrained());
+            int[] predictions = lda.predict(X);
+            assertEquals(X.length, predictions.length);
+        }
+        
+        @Test
+        @DisplayName("Predict probabilities")
+        void testPredictProba() {
+            LinearDiscriminantAnalysis lda = new LinearDiscriminantAnalysis.Builder().build();
+            lda.train(X, y);
+            
+            double[] proba = lda.predictProba(X[0]);
+            assertEquals(3, proba.length);
+            
+            double sum = 0;
+            for (double p : proba) sum += p;
+            assertEquals(1.0, sum, 0.01);
+        }
+        
+        @Test
+        @DisplayName("Score computes accuracy")
+        void testScore() {
+            LinearDiscriminantAnalysis lda = new LinearDiscriminantAnalysis.Builder().build();
+            lda.train(X, y);
+            
+            double score = lda.score(X, y);
+            assertTrue(score > 0.5);
+        }
+    }
 }
