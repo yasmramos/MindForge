@@ -17,6 +17,17 @@ public interface Classifier<T> {
     void train(T[] x, int[] y);
     
     /**
+     * Fits the classifier with the given training data.
+     * Alias for train() to follow scikit-learn convention.
+     * 
+     * @param x training data features
+     * @param y training data labels
+     */
+    default void fit(T[] x, int[] y) {
+        train(x, y);
+    }
+    
+    /**
      * Predicts the label for a single input.
      * 
      * @param x input data

@@ -5,7 +5,7 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 [![Build Status](https://github.com/yasmramos/MindForge/actions/workflows/ci.yml/badge.svg)](https://github.com/yasmramos/MindForge/actions/workflows/ci.yml)
 [![Java Version](https://img.shields.io/badge/Java-11%2B-blue)](https://www.oracle.com/java/)
 [![Maven](https://img.shields.io/badge/Maven-3.6%2B-red)](https://maven.apache.org/)
-[![License](https://img.shields.io/badge/License-TBD-yellow)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ## ⚡ Quick Start
 

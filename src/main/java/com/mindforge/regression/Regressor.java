@@ -17,6 +17,17 @@ public interface Regressor<T> {
     void train(T[] x, double[] y);
     
     /**
+     * Fits the regressor with the given training data.
+     * Alias for train() to follow scikit-learn convention.
+     * 
+     * @param x training data features
+     * @param y training data target values
+     */
+    default void fit(T[] x, double[] y) {
+        train(x, y);
+    }
+    
+    /**
      * Predicts the value for a single input.
      * 
      * @param x input data
