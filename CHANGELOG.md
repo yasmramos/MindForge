@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Neural Networks Module (`com.mindforge.neural`)
+#### Neural Networks Module (`io.github.yasmramos.mindforge.neural`)
 - **NeuralNetwork** - Flexible feedforward neural network implementation
   - Configurable learning rate, epochs, and batch size
   - Support for multiple layer types
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BatchNormLayer** - Batch normalization for training stability
 - **ActivationFunctions** - Comprehensive activation function library
 
-#### Validation & Metrics (`com.mindforge.validation`)
+#### Validation & Metrics (`io.github.yasmramos.mindforge.validation`)
 - **ConfusionMatrix** - Binary and multiclass confusion matrix
   - True/False Positives and Negatives
   - Precision, Recall, F1-Score, Accuracy
@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - FPR/TPR curve points
 - **Enhanced Metrics** - MSE, RMSE, MAE, R2 for regression
 
-#### Dataset Management (`com.mindforge.data`)
+#### Dataset Management (`io.github.yasmramos.mindforge.data`)
 - **Dataset** - Unified dataset container
   - Classification and regression support
   - Train/test split functionality
@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Breast Cancer dataset (569 samples, 30 features, 2 classes)
   - Synthetic data generators (makeBlobs, makeCircles)
 
-#### Utilities (`com.mindforge.util`)
+#### Utilities (`io.github.yasmramos.mindforge.util`)
 - **ArrayUtils** - Comprehensive array operations
   - Statistical functions (mean, std, variance)
   - Vector operations (dot, add, multiply)
@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - File and console output
   - Formatted logging support
 
-#### Examples (`com.mindforge.examples`)
+#### Examples (`io.github.yasmramos.mindforge.examples`)
 - **NeuralNetworkExample** - Neural network training demo
 - **ValidationMetricsExample** - Metrics and evaluation demo
 - **DatasetWorkflowExample** - Complete data pipeline demo

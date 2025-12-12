@@ -10,7 +10,7 @@ mvn clean install -DskipTests
 
 # Then run examples
 cd examples
-mvn compile exec:java -Dexec.mainClass="com.mindforge.examples.QuickStart"
+mvn compile exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.QuickStart"
 ```
 
 ## Available Examples
@@ -24,7 +24,7 @@ A beginner-friendly introduction to MindForge covering the basic ML workflow:
 - Making predictions and evaluating accuracy
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.QuickStart"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.QuickStart"
 ```
 
 ### 2. ClusteringExample.java
@@ -35,7 +35,7 @@ K-Means clustering demonstration:
 - Practical customer segmentation example
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.ClusteringExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.ClusteringExample"
 ```
 
 ### 3. RegressionExample.java
@@ -46,7 +46,7 @@ Regression algorithms demonstration:
 - Practical house price prediction example
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.RegressionExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.RegressionExample"
 ```
 
 ### 4. PreprocessingExample.java
@@ -57,7 +57,7 @@ Data preprocessing techniques:
 - Practical employee data preprocessing example
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.PreprocessingExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.PreprocessingExample"
 ```
 
 ### 5. PipelineExample.java
@@ -68,7 +68,7 @@ ML Pipelines demonstration:
 - Train/test workflow management
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.PipelineExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.PipelineExample"
 ```
 
 ### 6. ValidationExample.java
@@ -79,7 +79,7 @@ Model validation techniques:
 - Confusion matrix breakdown
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.ValidationExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.ValidationExample"
 ```
 
 ## Project Structure
@@ -115,12 +115,12 @@ cd examples
 mvn compile
 
 # 3. Run all examples
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.QuickStart"
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.ClusteringExample"
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.RegressionExample"
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.PreprocessingExample"
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.PipelineExample"
-mvn exec:java -Dexec.mainClass="com.mindforge.examples.ValidationExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.QuickStart"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.ClusteringExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.RegressionExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.PreprocessingExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.PipelineExample"
+mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.ValidationExample"
 ```
 
 ## Using MindForge in Your Own Project
@@ -129,14 +129,14 @@ Download the JAR from the [releases page](https://github.com/yasmramos/MindForge
 
 ```bash
 mvn install:install-file -Dfile=mindforge-1.1.0-alpha.jar \
-    -DgroupId=com.mindforge -DartifactId=mindforge \
+    -DgroupId=io.github.yasmramos.mindforge -DartifactId=mindforge \
     -Dversion=1.1.0-alpha -Dpackaging=jar
 ```
 
 Then add to your `pom.xml`:
 ```xml
 <dependency>
-    <groupId>com.mindforge</groupId>
+    <groupId>io.github.yasmramos.mindforge</groupId>
     <artifactId>mindforge</artifactId>
     <version>1.1.0-alpha</version>
 </dependency>

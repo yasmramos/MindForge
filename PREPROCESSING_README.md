@@ -1,6 +1,6 @@
 # Data Preprocessing Package
 
-The `com.mindforge.preprocessing` package provides essential tools to prepare data before training machine learning models.
+The `io.github.yasmramos.mindforge.preprocessing` package provides essential tools to prepare data before training machine learning models.
 
 ## 📦 Implemented Classes
 
@@ -304,5 +304,5 @@ All classes include comprehensive tests:
 
 Run tests:
 ```bash
-mvn test -Dtest="com.mindforge.preprocessing.*"
+mvn test -Dtest="io.github.yasmramos.mindforge.preprocessing.*"
 ```

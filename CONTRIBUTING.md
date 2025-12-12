@@ -58,7 +58,7 @@ mvn clean install -DskipTests
 
 ```bash
 cd examples
-mvn compile exec:java -Dexec.mainClass="com.mindforge.examples.QuickStart"
+mvn compile exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.QuickStart"
 ```
 
 ## How to Contribute
@@ -129,10 +129,10 @@ Types:
 ### Code Organization
 
 ```java
-package com.mindforge.category;
+package io.github.yasmramos.mindforge.category;
 
 import java.util.*;  // Standard library imports first
-import com.mindforge.*;  // Project imports second
+import io.github.yasmramos.mindforge.*;  // Project imports second
 
 /**
  * Class description.
