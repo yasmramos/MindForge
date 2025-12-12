@@ -7,7 +7,7 @@
 
     <groupId>io.github.yasmramos</groupId>
     <artifactId>mindforge</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
 
     <name>MindForge</name>
@@ -27,7 +27,7 @@
     <developers>
         <developer>
             <id>yasmramos</id>
-            <name>Yasmin Ramos</name>
+            <name>Yasmany Ramos Garcia</name>
             <url>https://github.com/yasmramos</url>
         </developer>
     </developers>
