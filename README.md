@@ -12,11 +12,11 @@ A Machine Learning and Artificial Intelligence library for Java, inspired by lib
 Get started with MindForge in minutes! Here's a complete example that demonstrates classification, regression, and clustering:
 
 ```java
-import com.mindforge.classification.*;
-import com.mindforge.regression.LinearRegression;
-import com.mindforge.clustering.KMeans;
-import com.mindforge.preprocessing.StandardScaler;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.*;
+import io.github.yasmramos.mindforge.regression.LinearRegression;
+import io.github.yasmramos.mindforge.clustering.KMeans;
+import io.github.yasmramos.mindforge.preprocessing.StandardScaler;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 public class QuickStart {
     public static void main(String[] args) {
@@ -151,7 +151,7 @@ Add the GitHub Packages repository to your `pom.xml`:
 
 <dependencies>
     <dependency>
-        <groupId>com.mindforge</groupId>
+        <groupId>io.github.yasmramos.mindforge</groupId>
         <artifactId>mindforge</artifactId>
         <version>1.2.0-alpha</version>
     </dependency>
@@ -176,7 +176,7 @@ Download the latest release from [GitHub Releases](https://github.com/yasmramos/
 **Maven (local JAR):**
 ```bash
 mvn install:install-file -Dfile=mindforge-1.2.0-alpha.jar \
-  -DgroupId=com.mindforge -DartifactId=mindforge \
+  -DgroupId=io.github.yasmramos.mindforge -DartifactId=mindforge \
   -Dversion=1.2.0-alpha -Dpackaging=jar
 ```
 
@@ -195,8 +195,8 @@ The JAR will be generated at `target/mindforge-1.2.0-alpha.jar`.
 ### Classification with K-Nearest Neighbors
 
 ```java
-import com.mindforge.classification.KNearestNeighbors;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.KNearestNeighbors;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X_train = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {6.0, 5.0}, {7.0, 8.0}, {8.0, 7.0}};
@@ -220,8 +220,8 @@ System.out.println("Accuracy: " + accuracy);
 ### Classification with Decision Trees
 
 ```java
-import com.mindforge.classification.DecisionTreeClassifier;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.DecisionTreeClassifier;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X_train = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {6.0, 5.0}, {7.0, 8.0}, {8.0, 7.0}};
@@ -254,9 +254,9 @@ System.out.println("Tree depth: " + tree.getTreeDepth());
 ### Random Forest Classification
 
 ```java
-import com.mindforge.classification.RandomForestClassifier;
-import com.mindforge.classification.DecisionTreeClassifier;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.RandomForestClassifier;
+import io.github.yasmramos.mindforge.classification.DecisionTreeClassifier;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X_train = {{1.0, 2.0}, {2.0, 3.0}, {8.0, 8.0}, {9.0, 10.0}};
@@ -297,7 +297,7 @@ System.out.println("Feature importance: " + Arrays.toString(importance));
 
 ```java
 import io.mindforge.classification.LogisticRegression;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X_train = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {8.0, 8.0}, {9.0, 10.0}, {10.0, 11.0}};
@@ -339,9 +339,9 @@ System.out.println("Final loss: " + lossHistory.get(lossHistory.size() - 1));
 ### Cross-Validation
 
 ```java
-import com.mindforge.classification.KNearestNeighbors;
-import com.mindforge.validation.CrossValidation;
-import com.mindforge.validation.CrossValidationResult;
+import io.github.yasmramos.mindforge.classification.KNearestNeighbors;
+import io.github.yasmramos.mindforge.validation.CrossValidation;
+import io.github.yasmramos.mindforge.validation.CrossValidationResult;
 
 // Training data
 double[][] X = {{1.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {8.0, 8.0}, {9.0, 10.0}, {10.0, 11.0}};
@@ -394,10 +394,10 @@ System.out.println("Test Accuracy: " + accuracy);
 ### Naive Bayes Classification
 
 ```java
-import com.mindforge.classification.GaussianNaiveBayes;
-import com.mindforge.classification.MultinomialNaiveBayes;
-import com.mindforge.classification.BernoulliNaiveBayes;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.GaussianNaiveBayes;
+import io.github.yasmramos.mindforge.classification.MultinomialNaiveBayes;
+import io.github.yasmramos.mindforge.classification.BernoulliNaiveBayes;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // === Gaussian Naive Bayes (for continuous features) ===
 double[][] X_continuous = {{-2.0, -2.0}, {-1.8, -2.2}, {2.0, 2.0}, {1.8, 2.2}};
@@ -435,8 +435,8 @@ System.out.println("Bernoulli Predictions: " + Arrays.toString(pred_bnb));
 ### Support Vector Machines (SVM)
 
 ```java
-import com.mindforge.classification.SVC;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.SVC;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X_svm = {
@@ -472,8 +472,8 @@ System.out.println("Number of classes: " + svc.getNumClasses());
 ### Gradient Boosting Classification
 
 ```java
-import com.mindforge.classification.GradientBoostingClassifier;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.GradientBoostingClassifier;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X_train = {
@@ -515,8 +515,8 @@ System.out.println("Training accuracy: " + accuracy);
 ### Linear Regression
 
 ```java
-import com.mindforge.regression.LinearRegression;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.regression.LinearRegression;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X_train = {{1.0}, {2.0}, {3.0}, {4.0}, {5.0}};
@@ -540,8 +540,8 @@ System.out.println("RMSE: " + rmse);
 ### Advanced Regression (Ridge, Lasso, ElasticNet, SVR)
 
 ```java
-import com.mindforge.regression.*;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.regression.*;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 // Training data
 double[][] X = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
@@ -602,7 +602,7 @@ svrPoly.train(X, y);
 ### Linear Discriminant Analysis (LDA)
 
 ```java
-import com.mindforge.decomposition.LinearDiscriminantAnalysis;
+import io.github.yasmramos.mindforge.decomposition.LinearDiscriminantAnalysis;
 
 // Training data with 3 classes
 double[][] X = {
@@ -633,7 +633,7 @@ System.out.println("Explained variance: " + Arrays.toString(varianceRatio));
 ### Recurrent Neural Networks (RNN/LSTM)
 
 ```java
-import com.mindforge.neural.rnn.*;
+import io.github.yasmramos.mindforge.neural.rnn.*;
 
 // === Simple RNN for sequence prediction ===
 int inputSize = 10;    // Input features per timestep
@@ -675,7 +675,7 @@ double[][] cellStates = lstm.getLastCellState();
 ### Clustering with K-Means
 
 ```java
-import com.mindforge.clustering.KMeans;
+import io.github.yasmramos.mindforge.clustering.KMeans;
 
 // Data
 double[][] data = {
@@ -701,7 +701,7 @@ double[][] centroids = kmeans.getCentroids();
 ### Data Preprocessing
 
 ```java
-import com.mindforge.preprocessing.*;
+import io.github.yasmramos.mindforge.preprocessing.*;
 
 // Normalize features to [0, 1]
 double[][] data = {{1.0, 100.0}, {2.0, 200.0}, {3.0, 300.0}};
@@ -736,9 +736,9 @@ DataSplit.Split split = DataSplit.trainTestSplit(X, y, 0.25, 42);
 ### Feature Selection
 
 ```java
-import com.mindforge.feature.VarianceThreshold;
-import com.mindforge.feature.SelectKBest;
-import com.mindforge.feature.RFE;
+import io.github.yasmramos.mindforge.feature.VarianceThreshold;
+import io.github.yasmramos.mindforge.feature.SelectKBest;
+import io.github.yasmramos.mindforge.feature.RFE;
 
 // === VarianceThreshold - Remove low-variance features ===
 double[][] X = {
@@ -785,7 +785,7 @@ System.out.println("Feature importances: " + Arrays.toString(rfe.getFeatureImpor
 ### PCA (Principal Component Analysis)
 
 ```java
-import com.mindforge.decomposition.PCA;
+import io.github.yasmramos.mindforge.decomposition.PCA;
 
 // Create sample data
 double[][] X = {
@@ -819,8 +819,8 @@ System.out.println("Number of components: " + pca.getNumberOfComponents());
 ### Model Persistence
 
 ```java
-import com.mindforge.persistence.ModelPersistence;
-import com.mindforge.classification.GaussianNaiveBayes;
+import io.github.yasmramos.mindforge.persistence.ModelPersistence;
+import io.github.yasmramos.mindforge.classification.GaussianNaiveBayes;
 
 // Train a model
 double[][] X_train = {{-2.0, -2.0}, {-1.8, -2.2}, {2.0, 2.0}, {1.8, 2.2}};
@@ -858,7 +858,7 @@ GaussianNaiveBayes fromBytes = ModelPersistence.fromBytes(bytes);
 ### Neural Networks (MLP)
 
 ```java
-import com.mindforge.neural.*;
+import io.github.yasmramos.mindforge.neural.*;
 
 // Create a neural network for XOR problem
 NeuralNetwork network = new NeuralNetwork();
@@ -889,7 +889,7 @@ double[] softmaxOut = ActivationFunction.softmax(input);
 ### Dataset Loaders
 
 ```java
-import com.mindforge.data.*;
+import io.github.yasmramos.mindforge.data.*;
 
 // Load built-in datasets
 Dataset iris = DatasetLoader.loadIris();           // 150 samples, 4 features, 3 classes
@@ -922,7 +922,7 @@ Dataset shuffled = iris.shuffle(42L);
 ### Confusion Matrix and ROC Curve
 
 ```java
-import com.mindforge.validation.*;
+import io.github.yasmramos.mindforge.validation.*;
 
 // === Confusion Matrix ===
 int[] yTrue = {0, 0, 1, 1, 2, 2, 0, 1, 2};
@@ -964,7 +964,7 @@ double optimalThreshold = roc.getOptimalThreshold();
 ### Visualization
 
 ```java
-import com.mindforge.visualization.ChartGenerator;
+import io.github.yasmramos.mindforge.visualization.ChartGenerator;
 
 // Line chart
 double[] x = {1, 2, 3, 4, 5};
@@ -989,7 +989,7 @@ ChartGenerator.saveHeatmap("heatmap.png", heatmapData, "Confusion Matrix");
 ### Logging and Configuration
 
 ```java
-import com.mindforge.util.*;
+import io.github.yasmramos.mindforge.util.*;
 
 // === Logging ===
 MindForgeLogger.setLevel(MindForgeLogger.Level.DEBUG);
@@ -1022,7 +1022,7 @@ appConfig.save("app_config.properties");
 ### Array Utilities
 
 ```java
-import com.mindforge.util.ArrayUtils;
+import io.github.yasmramos.mindforge.util.ArrayUtils;
 
 // Matrix operations
 double[][] matrix = {{1, 2, 3}, {4, 5, 6}};
@@ -1062,8 +1062,8 @@ double[] scaled = ArrayUtils.scale(a, 2.0);
 ### REST API Server
 
 ```java
-import com.mindforge.api.*;
-import com.mindforge.classification.KNearestNeighbors;
+import io.github.yasmramos.mindforge.api.*;
+import io.github.yasmramos.mindforge.classification.KNearestNeighbors;
 
 // Create and train a model
 KNearestNeighbors knn = new KNearestNeighbors(3);
@@ -1342,7 +1342,7 @@ double minkowski(double[] a, double[] b, double p)    // Minkowski distance
 
 ## 📄 Project Information
 
-- **Group ID**: com.mindforge
+- **Group ID**: io.github.yasmramos.mindforge
 - **Artifact ID**: mindforge
 - **Version**: 1.2.0-alpha
 - **Java Version**: 11

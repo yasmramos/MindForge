@@ -5,7 +5,7 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mindforge</groupId>
+    <groupId>io.github.yasmramos</groupId>
     <artifactId>mindforge</artifactId>
     <version>1.2.0-alpha</version>
     <packaging>jar</packaging>
