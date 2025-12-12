@@ -1,11 +1,11 @@
-package com.mindforge.examples;
+package io.github.yasmramos.mindforge.examples;
 
-import com.mindforge.classification.KNearestNeighbors;
-import com.mindforge.classification.DecisionTreeClassifier;
-import com.mindforge.classification.GaussianNaiveBayes;
-import com.mindforge.preprocessing.StandardScaler;
-import com.mindforge.preprocessing.DataSplit;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.KNearestNeighbors;
+import io.github.yasmramos.mindforge.classification.DecisionTreeClassifier;
+import io.github.yasmramos.mindforge.classification.GaussianNaiveBayes;
+import io.github.yasmramos.mindforge.preprocessing.StandardScaler;
+import io.github.yasmramos.mindforge.preprocessing.DataSplit;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 /**
  * Quick Start Guide for MindForge ML Library

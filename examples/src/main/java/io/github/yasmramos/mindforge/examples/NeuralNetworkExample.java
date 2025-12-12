@@ -1,10 +1,10 @@
-package com.mindforge.examples;
+package io.github.yasmramos.mindforge.examples;
 
-import com.mindforge.data.Dataset;
-import com.mindforge.data.DatasetLoader;
-import com.mindforge.neural.*;
-import com.mindforge.validation.ConfusionMatrix;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.data.Dataset;
+import io.github.yasmramos.mindforge.data.DatasetLoader;
+import io.github.yasmramos.mindforge.neural.*;
+import io.github.yasmramos.mindforge.validation.ConfusionMatrix;
+import io.github.yasmramos.mindforge.validation.Metrics;
 
 /**
  * Example demonstrating neural network usage with MindForge.

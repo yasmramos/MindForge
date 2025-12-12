@@ -1,8 +1,8 @@
-package com.mindforge.examples;
+package io.github.yasmramos.mindforge.examples;
 
-import com.mindforge.preprocessing.StandardScaler;
-import com.mindforge.preprocessing.MinMaxScaler;
-import com.mindforge.preprocessing.LabelEncoder;
+import io.github.yasmramos.mindforge.preprocessing.StandardScaler;
+import io.github.yasmramos.mindforge.preprocessing.MinMaxScaler;
+import io.github.yasmramos.mindforge.preprocessing.LabelEncoder;
 import java.util.Arrays;
 
 /**

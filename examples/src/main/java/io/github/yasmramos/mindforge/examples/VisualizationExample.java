@@ -1,11 +1,11 @@
-package com.mindforge.examples;
+package io.github.yasmramos.mindforge.examples;
 
-import com.mindforge.data.Dataset;
-import com.mindforge.data.DatasetLoader;
-import com.mindforge.neural.*;
-import com.mindforge.validation.ConfusionMatrix;
-import com.mindforge.validation.ROCCurve;
-import com.mindforge.visualization.ChartGenerator;
+import io.github.yasmramos.mindforge.data.Dataset;
+import io.github.yasmramos.mindforge.data.DatasetLoader;
+import io.github.yasmramos.mindforge.neural.*;
+import io.github.yasmramos.mindforge.validation.ConfusionMatrix;
+import io.github.yasmramos.mindforge.validation.ROCCurve;
+import io.github.yasmramos.mindforge.visualization.ChartGenerator;
 
 import java.io.IOException;
 import java.util.List;

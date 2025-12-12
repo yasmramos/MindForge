@@ -1,11 +1,11 @@
-package com.mindforge.examples;
+package io.github.yasmramos.mindforge.examples;
 
-import com.mindforge.validation.CrossValidation;
-import com.mindforge.validation.CrossValidationResult;
-import com.mindforge.validation.Metrics;
-import com.mindforge.classification.KNearestNeighbors;
-import com.mindforge.classification.DecisionTreeClassifier;
-import com.mindforge.classification.GaussianNaiveBayes;
+import io.github.yasmramos.mindforge.validation.CrossValidation;
+import io.github.yasmramos.mindforge.validation.CrossValidationResult;
+import io.github.yasmramos.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.classification.KNearestNeighbors;
+import io.github.yasmramos.mindforge.classification.DecisionTreeClassifier;
+import io.github.yasmramos.mindforge.classification.GaussianNaiveBayes;
 import java.util.Random;
 
 /**

@@ -1,7 +1,7 @@
-package com.mindforge.examples;
+package io.github.yasmramos.mindforge.examples;
 
-import com.mindforge.clustering.KMeans;
-import com.mindforge.preprocessing.StandardScaler;
+import io.github.yasmramos.mindforge.clustering.KMeans;
+import io.github.yasmramos.mindforge.preprocessing.StandardScaler;
 import java.util.Random;
 
 /**

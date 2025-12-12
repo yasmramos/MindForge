@@ -1,9 +1,9 @@
-package com.mindforge.examples;
+package io.github.yasmramos.mindforge.examples;
 
-import com.mindforge.regression.LinearRegression;
-import com.mindforge.regression.RidgeRegression;
-import com.mindforge.preprocessing.StandardScaler;
-import com.mindforge.validation.Metrics;
+import io.github.yasmramos.mindforge.regression.LinearRegression;
+import io.github.yasmramos.mindforge.regression.RidgeRegression;
+import io.github.yasmramos.mindforge.preprocessing.StandardScaler;
+import io.github.yasmramos.mindforge.validation.Metrics;
 import java.util.Random;
 
 /**
