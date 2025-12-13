@@ -119,4 +119,4 @@ jobs:
     - name: Run QuickStart example
       run: |
         cd examples
-        mvn exec:java -Dexec.mainClass="com.mindforge.examples.QuickStart" -B
+        mvn exec:java -Dexec.mainClass="io.github.yasmramos.mindforge.examples.QuickStart" -B
