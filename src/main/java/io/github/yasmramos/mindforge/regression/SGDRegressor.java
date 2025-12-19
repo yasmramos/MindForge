@@ -7,7 +7,7 @@ import java.util.Random;
  * Stochastic Gradient Descent regressor.
  * Supports different loss functions and regularization.
  */
-public class SGDRegressor implements Regressor, Serializable {
+public class SGDRegressor implements Serializable {
     private static final long serialVersionUID = 1L;
     
     public enum Loss { SQUARED, HUBER, EPSILON_INSENSITIVE }
@@ -44,7 +44,6 @@ public class SGDRegressor implements Regressor, Serializable {
         this(Loss.SQUARED, Penalty.L2, 0.0001, 0.15, 0.1, 0.01, 1000, 1e-4, 42);
     }
     
-    @Override
     public void fit(double[][] X, double[] y) {
         Random random = new Random(randomSeed);
         int n = X.length;
@@ -143,7 +142,6 @@ public class SGDRegressor implements Regressor, Serializable {
         }
     }
     
-    @Override
     public double[] predict(double[][] X) {
         double[] predictions = new double[X.length];
         for (int i = 0; i < X.length; i++) {

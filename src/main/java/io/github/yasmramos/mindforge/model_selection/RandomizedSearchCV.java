@@ -44,7 +44,7 @@ public class RandomizedSearchCV implements Serializable {
      * @param X Training features
      * @param y Training labels
      */
-    public void fit(BiFunction<Map<String, Object>, double[][], Classifier> modelSupplier,
+    public void fit(BiFunction<Map<String, Object>, double[][], Object> modelSupplier,
                    Map<String, Object> paramDistributions,
                    double[][] X, int[] y) {
         Random random = new Random(randomSeed);
@@ -88,39 +88,35 @@ public class RandomizedSearchCV implements Serializable {
         return params;
     }
     
-    private double crossValidate(BiFunction<Map<String, Object>, double[][], Classifier> modelSupplier,
+    private double crossValidate(BiFunction<Map<String, Object>, double[][], Object> modelSupplier,
                                 Map<String, Object> params, double[][] X, int[] y) {
-        KFold kfold = new KFold(cv, true, randomSeed);
-        List<double[]> splits = kfold.split(X);
+        KFold kfold = new KFold(cv, true, new Random(randomSeed));
+        List<int[][]> splits = kfold.split(X);
         
         double totalScore = 0;
-        for (double[] split : splits) {
-            int trainSize = 0, testSize = 0;
-            for (double v : split) {
-                if (v == 0) trainSize++;
-                else testSize++;
+        for (int[][] split : splits) {
+            int[] trainIndices = split[0];
+            int[] testIndices = split[1];
+            
+            double[][] XTrain = new double[trainIndices.length][];
+            double[][] XTest = new double[testIndices.length][];
+            int[] yTrain = new int[trainIndices.length];
+            int[] yTest = new int[testIndices.length];
+            
+            for (int i = 0; i < trainIndices.length; i++) {
+                XTrain[i] = X[trainIndices[i]];
+                yTrain[i] = y[trainIndices[i]];
             }
-            
-            double[][] XTrain = new double[trainSize][];
-            double[][] XTest = new double[testSize][];
-            int[] yTrain = new int[trainSize];
-            int[] yTest = new int[testSize];
-            
-            int trainIdx = 0, testIdx = 0;
-            for (int i = 0; i < X.length; i++) {
-                if (split[i] == 0) {
-                    XTrain[trainIdx] = X[i];
-                    yTrain[trainIdx++] = y[i];
-                } else {
-                    XTest[testIdx] = X[i];
-                    yTest[testIdx++] = y[i];
-                }
+            for (int i = 0; i < testIndices.length; i++) {
+                XTest[i] = X[testIndices[i]];
+                yTest[i] = y[testIndices[i]];
             }
             
             try {
-                Classifier model = modelSupplier.apply(params, XTrain);
-                model.fit(XTrain, yTrain);
-                int[] predictions = model.predict(XTest);
+                Object model = modelSupplier.apply(params, XTrain);
+                // Use reflection to call fit and predict
+                model.getClass().getMethod("fit", double[][].class, int[].class).invoke(model, XTrain, yTrain);
+                int[] predictions = (int[]) model.getClass().getMethod("predict", double[][].class).invoke(model, XTest);
                 totalScore += Metrics.accuracy(yTest, predictions);
             } catch (Exception e) {
                 totalScore += 0; // Failed configuration

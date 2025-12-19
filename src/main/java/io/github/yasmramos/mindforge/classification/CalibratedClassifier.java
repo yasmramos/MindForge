@@ -7,7 +7,7 @@ import java.util.Arrays;
  * Probability calibration using Platt scaling or isotonic regression.
  * Wraps a classifier to provide well-calibrated probability estimates.
  */
-public class CalibratedClassifier implements Classifier, ProbabilisticClassifier, Serializable {
+public class CalibratedClassifier implements Serializable {
     private static final long serialVersionUID = 1L;
     
     public enum Method { SIGMOID, ISOTONIC }
@@ -34,7 +34,6 @@ public class CalibratedClassifier implements Classifier, ProbabilisticClassifier
         this(baseClassifier, Method.SIGMOID, 5);
     }
     
-    @Override
     public void fit(double[][] X, int[] y) {
         classes = Arrays.stream(y).distinct().sorted().toArray();
         int nClasses = classes.length;
@@ -218,7 +217,6 @@ public class CalibratedClassifier implements Classifier, ProbabilisticClassifier
         return expanded;
     }
     
-    @Override
     public int[] predict(double[][] X) {
         double[][] proba = predictProbability(X);
         int[] predictions = new int[X.length];
@@ -232,7 +230,6 @@ public class CalibratedClassifier implements Classifier, ProbabilisticClassifier
         return predictions;
     }
     
-    @Override
     public double[][] predictProbability(double[][] X) {
         double[][] probas = new double[X.length][classes.length];
         

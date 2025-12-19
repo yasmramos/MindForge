@@ -72,7 +72,9 @@ class AnomalyDetectionTest {
     @Test
     void testLocalOutlierFactorDecisionFunction() {
         double[][] X = createNormalData();
-        LocalOutlierFactor lof = new LocalOutlierFactor();
+        LocalOutlierFactor lof = new LocalOutlierFactor.Builder()
+            .nNeighbors(5)
+            .build();
         lof.fit(X);
         
         double[] scores = lof.decisionFunction(X);

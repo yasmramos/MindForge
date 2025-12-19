@@ -8,7 +8,7 @@ import java.util.Random;
  * Stochastic Gradient Descent classifier.
  * Supports different loss functions: hinge (SVM), log (logistic regression), perceptron.
  */
-public class SGDClassifier implements Classifier, Serializable {
+public class SGDClassifier implements Serializable {
     private static final long serialVersionUID = 1L;
     
     public enum Loss { HINGE, LOG, PERCEPTRON, SQUARED_HINGE }
@@ -43,7 +43,6 @@ public class SGDClassifier implements Classifier, Serializable {
         this(Loss.HINGE, Penalty.L2, 0.0001, 0.15, 0.01, 1000, 1e-4, 42);
     }
     
-    @Override
     public void fit(double[][] X, int[] y) {
         Random random = new Random(randomSeed);
         int nFeatures = X[0].length;
@@ -164,7 +163,6 @@ public class SGDClassifier implements Classifier, Serializable {
         }
     }
     
-    @Override
     public int[] predict(double[][] X) {
         int[] predictions = new int[X.length];
         for (int i = 0; i < X.length; i++) {
