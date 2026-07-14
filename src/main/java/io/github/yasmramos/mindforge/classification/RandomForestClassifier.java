@@ -576,4 +576,14 @@ public class RandomForestClassifier {
     public int[] getClasses() {
         return classes != null ? classes.clone() : null;
     }
+    
+    /**
+     * Get the list of decision trees in the forest.
+     * Package-private for TreeSHAP access.
+     * 
+     * @return List of decision trees
+     */
+    public List<DecisionTreeClassifier> getTrees() {
+        return trees != null ? new ArrayList<>(trees) : null;
+    }
 }

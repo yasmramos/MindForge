@@ -710,4 +710,14 @@ public class RandomForestRegressor implements Regressor<double[]> {
             fitted
         );
     }
+    
+    /**
+     * Get the list of decision trees in the forest.
+     * Package-private for TreeSHAP access.
+     * 
+     * @return List of decision trees
+     */
+    public List<DecisionTreeRegressor> getTrees() {
+        return trees != null ? new ArrayList<>(trees) : null;
+    }
 }
