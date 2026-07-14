@@ -20,10 +20,9 @@ public class TreeSHAPExample {
         System.out.println("Loading Iris dataset...");
         var dataset = DatasetLoader.loadIris();
         double[][] X = dataset.getFeatures();
-        int[] y = dataset.getTargets();
+        int[] y = dataset.getLabels();
         
         System.out.println("Dataset: " + X.length + " samples, " + X[0].length + " features");
-        System.out.println("Classes: " + dataset.getClasses().length + "\n");
         
         // Train Random Forest
         System.out.println("Training Random Forest classifier...");
@@ -35,6 +34,8 @@ public class TreeSHAPExample {
             .build();
         
         rf.fit(X, y);
+        
+        System.out.println("Classes: " + rf.getClasses().length + "\n");
         
         // Evaluate model
         int[] predictions = rf.predict(X);
@@ -60,7 +61,7 @@ public class TreeSHAPExample {
         System.out.println("=== Explaining Single Instance ===");
         double[] instance = X[100]; // Pick an instance to explain
         int trueLabel = y[100];
-        int predictedLabel = rf.predict(instance)[0];
+        int predictedLabel = rf.predict(new double[][] { instance })[0];
         
         System.out.println("Instance: " + java.util.Arrays.toString(instance));
         System.out.println("True label: " + trueLabel);
